@@ -1,5 +1,10 @@
+import {randomBytes} from 'crypto';
 import {VinculoFamiliar, Familiar, Paciente} from '../models';
 import {DatosCrearVinculo, DatosActualizarVinculo} from '../interfaces/vinculoFamiliar.interface';
+
+const generarTokenVinculacion = (): string => {
+    return randomBytes(32).toString('hex');
+};
 
 export const crearVinculoFamiliar = async (
     datos: DatosCrearVinculo
@@ -42,6 +47,9 @@ export const crearVinculoFamiliar = async (
         );
     }
 
+    const tokenVinculacion =
+        generarTokenVinculacion();
+
     const vinculo =
         await VinculoFamiliar.create({
             familiar_id:
@@ -53,9 +61,9 @@ export const crearVinculoFamiliar = async (
             es_contacto_principal:
                 datos.es_contacto_principal ?? false,
             codigo_vinculacion:
-                datos.codigo_vinculacion ?? null,
+                tokenVinculacion,
             codigo_usado:
-                datos.codigo_usado ?? false
+                false
         });
 
     return vinculo;
@@ -90,50 +98,51 @@ export const obtenerVinculoFamiliar = async (
     return vinculo;
 };
 
-export const listarVinculosFamiliares = async () => {
-    return await VinculoFamiliar.findAll({
-        include: [
-            {
-                model: Familiar,
-                as: 'familiar'
-            },
-            {
-                model: Paciente,
-                as: 'paciente'
-            }
-        ]
-    });
-};
+export const listarVinculosFamiliares =
+    async () => {
+        return await VinculoFamiliar.findAll({
+            include: [
+                {
+                    model: Familiar,
+                    as: 'familiar'
+                },
+                {
+                    model: Paciente,
+                    as: 'paciente'
+                }
+            ]
+        });
+    };
 
-export const actualizarVinculoFamiliar = async (
-    id: number,
-    datos: DatosActualizarVinculo
-) => {
-    const vinculo =
-        await VinculoFamiliar.findByPk(id);
+export const actualizarVinculoFamiliar =
+    async (
+        id: number,
+        datos: DatosActualizarVinculo
+    ) => {
+        const vinculo =
+            await VinculoFamiliar.findByPk(id);
 
-    if (!vinculo) {
-        throw new Error(
-            'Vínculo familiar no encontrado'
-        );
-    }
+        if (!vinculo) {
+            throw new Error(
+                'Vínculo familiar no encontrado'
+            );
+        }
 
-    await vinculo.update(datos);
+        await vinculo.update(datos);
 
-    return vinculo;
-};
+        return vinculo;
+    };
 
-export const eliminarVinculoFamiliar = async (
-    id: number
-) => {
-    const vinculo =
-        await VinculoFamiliar.findByPk(id);
+export const eliminarVinculoFamiliar =
+    async (id: number) => {
+        const vinculo =
+            await VinculoFamiliar.findByPk(id);
 
-    if (!vinculo) {
-        throw new Error(
-            'Vínculo familiar no encontrado'
-        );
-    }
+        if (!vinculo) {
+            throw new Error(
+                'Vínculo familiar no encontrado'
+            );
+        }
 
-    await vinculo.destroy();
-};
+        await vinculo.destroy();
+    };
