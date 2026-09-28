@@ -1,26 +1,5 @@
 import {Tratamiento, Paciente, Medicamento} from '../models';
-
-interface DatosCrearTratamiento {
-    paciente_id: number;
-    medicamento_id: number;
-    dosis: string;
-    frecuencia: string;
-    horario?: string | null;
-    desde?: Date | null;
-    hasta?: Date | null;
-    activa?: boolean;
-}
-
-interface DatosActualizarTratamiento {
-    paciente_id?: number;
-    medicamento_id?: number;
-    dosis?: string;
-    frecuencia?: string;
-    horario?: string | null;
-    desde?: Date | null;
-    hasta?: Date | null;
-    activa?: boolean;
-}
+import {DatosCrearTratamiento, DatosActualizarTratamiento} from '../interfaces/tratamiento.interface';
 
 export const crearTratamiento = async (
     datos: DatosCrearTratamiento

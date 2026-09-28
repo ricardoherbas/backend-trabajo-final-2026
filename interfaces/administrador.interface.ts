@@ -1,4 +1,3 @@
-export interface Administrador {
-    id: number;
+export interface DatosCrearAdministrador {
     persona_id: number;
 }

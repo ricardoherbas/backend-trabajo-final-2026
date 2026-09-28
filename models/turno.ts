@@ -1,20 +1,10 @@
 import {DataTypes, Model, CreationOptional} from 'sequelize';
 import {sequelize} from '../config/conexion-bd';
-import {Turno as TurnoInterface} from '../interfaces/turno.interface';
+import {DiaSemana} from '../types/dia-semana.type';
 
-export class Turno
-    extends Model<TurnoInterface, Partial<TurnoInterface>>
-    implements TurnoInterface
-{
+export class Turno extends Model {
     declare id: CreationOptional<number>;
-    declare dia_semana:
-        | 'lunes'
-        | 'martes'
-        | 'miércoles'
-        | 'jueves'
-        | 'viernes'
-        | 'sábado'
-        | 'domingo';
+    declare dia_semana: DiaSemana;
     declare hora_inicio: string;
     declare hora_fin: string;
     declare activo: boolean;
@@ -26,7 +16,7 @@ Turno.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         dia_semana: {
             type: DataTypes.ENUM(
@@ -38,30 +28,30 @@ Turno.init(
                 'sábado',
                 'domingo'
             ),
-            allowNull: false,
+            allowNull: false
         },
         hora_inicio: {
             type: DataTypes.TIME,
-            allowNull: false,
+            allowNull: false
         },
         hora_fin: {
             type: DataTypes.TIME,
-            allowNull: false,
+            allowNull: false
         },
         activo: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: true,
+            defaultValue: true
         },
         creado_en: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
-        },
+            defaultValue: DataTypes.NOW
+        }
     },
     {
         sequelize,
         tableName: 'turnos',
-        timestamps: false,
+        timestamps: false
     }
 );

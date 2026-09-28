@@ -7,7 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only app.ts",
     "build": "tsc",
     "start": "node dist/app.js",
-    "seed": "ts-node-dev --transpile-only database/seed.ts",
+    "seed": "ts-node-dev --transpile-only database/seeds/admin.seed.ts",
     "lint": "eslint .",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"

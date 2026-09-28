@@ -14,7 +14,7 @@ import medicamentoRouter from '../routes/medicamentos.route';
 import tratamientoRouter from '../routes/tratamiento.route';
 import parteDiarioRouter from '../routes/parteDiario.route';
 import pagoRouter from '../routes/pago.route';
-import {manejarError} from '../middlewares/error.middleware';
+import {errorMiddleware} from '../middlewares/error.middleware';
 
 export class Server {
     public app;
@@ -52,7 +52,7 @@ export class Server {
         this.app.use('/api/pagos', pagoRouter);
     }
 
-    errorHandlerGlobal() {this.app.use(manejarError);}
+    errorHandlerGlobal() {this.app.use(errorMiddleware);}
 
     getApp() {return this.app;}
 

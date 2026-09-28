@@ -1,9 +1,8 @@
-import { DataTypes, Model, CreationOptional } from 'sequelize';
-import { sequelize } from '../config/conexion-bd';
+import {DataTypes, Model, CreationOptional} from 'sequelize';
+import {sequelize} from '../config/conexion-bd';
 
 export class Persona extends Model {
     declare id: CreationOptional<number>;
-
     declare nombre: string;
     declare apellido: string;
     declare dni: string;
@@ -16,33 +15,33 @@ Persona.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         nombre: {
             type: DataTypes.STRING(100),
-            allowNull: false,
+            allowNull: false
         },
         apellido: {
             type: DataTypes.STRING(100),
-            allowNull: false,
+            allowNull: false
         },
         dni: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            unique: true,
+            unique: true
         },
         fecha_nacimiento: {
             type: DataTypes.DATEONLY,
-            allowNull: true,
+            allowNull: true
         },
         telefono: {
             type: DataTypes.STRING(30),
-            allowNull: true,
-        },
+            allowNull: true
+        }
     },
     {
         sequelize,
         tableName: 'personas',
-        timestamps: false,
+        timestamps: false
     }
 );

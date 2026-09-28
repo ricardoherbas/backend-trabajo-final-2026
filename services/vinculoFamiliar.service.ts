@@ -1,13 +1,5 @@
 import {VinculoFamiliar, Familiar, Paciente} from '../models';
-
-interface DatosCrearVinculo {
-    familiar_id: number;
-    paciente_id: number;
-    parentesco: string;
-    es_contacto_principal?: boolean;
-    codigo_vinculacion?: string | null;
-    codigo_usado?: boolean;
-}
+import {DatosCrearVinculo, DatosActualizarVinculo} from '../interfaces/vinculoFamiliar.interface';
 
 export const crearVinculoFamiliar = async (
     datos: DatosCrearVinculo
@@ -115,7 +107,7 @@ export const listarVinculosFamiliares = async () => {
 
 export const actualizarVinculoFamiliar = async (
     id: number,
-    datos: Partial<DatosCrearVinculo>
+    datos: DatosActualizarVinculo
 ) => {
     const vinculo =
         await VinculoFamiliar.findByPk(id);

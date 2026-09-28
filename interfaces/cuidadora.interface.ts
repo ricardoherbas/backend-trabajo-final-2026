@@ -1,4 +1,3 @@
-export interface Cuidadora {
-    id: number;
+export interface DatosCrearCuidadora {
     persona_id: number;
 }

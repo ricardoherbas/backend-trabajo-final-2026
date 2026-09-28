@@ -1,8 +1,13 @@
-export interface Asignacion {
-    id: number;
+export interface DatosCrearAsignacion {
     turno_id: number;
     cuidador_id: number;
     paciente_id: number;
-    activo: boolean;
-    creado_en: Date;
+    activo?: boolean;
+}
+
+export interface DatosActualizarAsignacion {
+    turno_id?: number;
+    cuidador_id?: number;
+    paciente_id?: number;
+    activo?: boolean;
 }

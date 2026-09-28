@@ -1,15 +1,15 @@
-export interface Turno {
-    id: number;
-    dia_semana:
-        | 'lunes'
-        | 'martes'
-        | 'miércoles'
-        | 'jueves'
-        | 'viernes'
-        | 'sábado'
-        | 'domingo';
+import {DiaSemana} from '../types/dia-semana.type';
+
+export interface DatosCrearTurno {
+    dia_semana: DiaSemana;
     hora_inicio: string;
     hora_fin: string;
-    activo: boolean;
-    creado_en: Date;
+    activo?: boolean;
+}
+
+export interface DatosActualizarTurno {
+    dia_semana?: DiaSemana;
+    hora_inicio?: string;
+    hora_fin?: string;
+    activo?: boolean;
 }

@@ -1,11 +1,7 @@
 import {DataTypes, Model, CreationOptional} from 'sequelize';
 import {sequelize} from '../config/conexion-bd';
-import {ParteDiario as ParteDiarioInterface} from '../interfaces/parteDiario.interface';
 
-export class ParteDiario
-    extends Model<ParteDiarioInterface, Partial<ParteDiarioInterface>>
-    implements ParteDiarioInterface
-{
+export class ParteDiario extends Model {
     declare id: CreationOptional<number>;
     declare asignacion_id: number;
     declare fecha: Date;
@@ -23,49 +19,49 @@ ParteDiario.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         asignacion_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         fecha: {
             type: DataTypes.DATEONLY,
-            allowNull: false,
+            allowNull: false
         },
         animo: {
             type: DataTypes.STRING(50),
-            allowNull: true,
+            allowNull: true
         },
         alimentacion: {
             type: DataTypes.STRING(100),
-            allowNull: true,
+            allowNull: true
         },
         descanso: {
             type: DataTypes.STRING(100),
-            allowNull: true,
+            allowNull: true
         },
         higiene: {
             type: DataTypes.STRING(100),
-            allowNull: true,
+            allowNull: true
         },
         novedades: {
             type: DataTypes.TEXT,
-            allowNull: true,
+            allowNull: true
         },
         observaciones: {
             type: DataTypes.TEXT,
-            allowNull: true,
+            allowNull: true
         },
         creado_en: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
-        },
+            defaultValue: DataTypes.NOW
+        }
     },
     {
         sequelize,
         tableName: 'partes_diarios',
-        timestamps: false,
+        timestamps: false
     }
 );

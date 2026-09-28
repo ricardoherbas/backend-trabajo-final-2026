@@ -1,32 +1,5 @@
 import {Turno} from '../models';
-
-interface DatosCrearTurno {
-    dia_semana:
-        | 'lunes'
-        | 'martes'
-        | 'miércoles'
-        | 'jueves'
-        | 'viernes'
-        | 'sábado'
-        | 'domingo';
-    hora_inicio: string;
-    hora_fin: string;
-    activo?: boolean;
-}
-
-interface DatosActualizarTurno {
-    dia_semana?:
-        | 'lunes'
-        | 'martes'
-        | 'miércoles'
-        | 'jueves'
-        | 'viernes'
-        | 'sábado'
-        | 'domingo';
-    hora_inicio?: string;
-    hora_fin?: string;
-    activo?: boolean;
-}
+import {DatosCrearTurno, DatosActualizarTurno} from '../interfaces/turno.interface';
 
 export const crearTurno = async (
     datos: DatosCrearTurno

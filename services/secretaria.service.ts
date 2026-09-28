@@ -1,40 +1,68 @@
-import { Secretaria, Persona } from '../models';
+import {Secretaria, Persona} from '../models';
+import {DatosCrearSecretaria} from '../interfaces/secretaria.interface';
 
-interface DatosCrearSecretaria {
-    persona_id: number;
-}
-export const crearSecretaria = async (datos: DatosCrearSecretaria) => {
-    const persona = await Persona.findByPk(datos.persona_id);
+export const crearSecretaria = async (
+    datos: DatosCrearSecretaria
+) => {
+    const persona =
+        await Persona.findByPk(
+            datos.persona_id
+        );
+
     if (!persona) {
-        throw new Error('La persona no existe');
+        throw new Error(
+            'La persona no existe'
+        );
     }
-    const secretariaExistente = await Secretaria.findOne({
-        where: {
-            persona_id: datos.persona_id
-        }
-    });
-    if (secretariaExistente) {
-        throw new Error('La persona ya es secretaria');
-    }
-    const secretaria = await Secretaria.create({
-        persona_id: datos.persona_id
-    });
-    return secretaria;
-};
-export const obtenerSecretaria = async (id: number) => {
-    const secretaria = await Secretaria.findByPk(id, {
-        include: [
-            {
-                model: Persona,
-                as: 'persona'
+
+    const secretariaExistente =
+        await Secretaria.findOne({
+            where: {
+                persona_id:
+                    datos.persona_id
             }
-        ]
-    });
-    if (!secretaria) {
-        throw new Error('Secretaria no encontrada');
+        });
+
+    if (secretariaExistente) {
+        throw new Error(
+            'La persona ya es secretaria'
+        );
     }
+
+    const secretaria =
+        await Secretaria.create({
+            persona_id:
+                datos.persona_id
+        });
+
     return secretaria;
 };
+
+export const obtenerSecretaria = async (
+    id: number
+) => {
+    const secretaria =
+        await Secretaria.findByPk(
+            id,
+            {
+                include: [
+                    {
+                        model: Persona,
+                        as: 'persona'
+                    }
+                ]
+            }
+        );
+
+    if (!secretaria) {
+        throw new Error(
+            'Secretaria no encontrada'
+        );
+    }
+
+    return secretaria;
+};
+
 export const listarSecretarias = async () => {
     return await Secretaria.findAll({
         include: [
@@ -45,11 +73,18 @@ export const listarSecretarias = async () => {
         ]
     });
 };
-export const eliminarSecretaria = async (id: number) => {
-    const secretaria = await Secretaria.findByPk(id);
+
+export const eliminarSecretaria = async (
+    id: number
+) => {
+    const secretaria =
+        await Secretaria.findByPk(id);
+
     if (!secretaria) {
-        throw new Error('Secretaria no encontrada');
+        throw new Error(
+            'Secretaria no encontrada'
+        );
     }
+
     await secretaria.destroy();
 };
-

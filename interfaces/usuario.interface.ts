@@ -1,10 +1,12 @@
-export interface Usuario {
-    id: number;
-    persona_id: number;
+import {RolUsuario} from '../types/rol-usuario.type';
+
+export interface DatosCrearUsuario {
+    nombre: string;
+    apellido: string;
+    dni: string;
+    fecha_nacimiento?: Date | null;
+    telefono?: string | null;
     email: string;
-    password_hash: string;
-    rol: 'administrador' | 'secretaria' | 'cuidadora' | 'familiar';
-    activo: boolean;
-    creado_en: Date;
-    actualizado_en: Date;
+    password: string;
+    rol: RolUsuario;
 }

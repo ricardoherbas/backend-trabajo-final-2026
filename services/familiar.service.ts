@@ -1,8 +1,5 @@
 import {Familiar, Persona} from '../models';
-
-interface DatosCrearFamiliar {
-    persona_id: number;
-}
+import {DatosCrearFamiliar} from '../interfaces/familiar.interface';
 
 export const crearFamiliar = async (
     datos: DatosCrearFamiliar

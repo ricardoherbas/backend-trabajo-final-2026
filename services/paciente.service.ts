@@ -1,18 +1,5 @@
 import {Paciente, Persona} from '../models';
-
-interface DatosCrearPaciente {
-    persona_id: number;
-    direccion?: string | null;
-    obra_social?: string | null;
-    observaciones?: string | null;
-}
-
-interface DatosActualizarPaciente {
-    direccion?: string | null;
-    obra_social?: string | null;
-    observaciones?: string | null;
-    activo?: boolean;
-}
+import {DatosCrearPaciente, DatosActualizarPaciente} from '../interfaces/paciente.interface';
 
 export const crearPaciente = async (
     datos: DatosCrearPaciente
@@ -52,7 +39,8 @@ export const crearPaciente = async (
                 datos.obra_social ?? null,
             observaciones:
                 datos.observaciones ?? null,
-            activo: true
+            activo:
+                true
         });
 
     return paciente;

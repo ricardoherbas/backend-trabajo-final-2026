@@ -1,18 +1,5 @@
 import {Asignacion, Turno, Cuidadora, Paciente} from '../models';
-
-interface DatosCrearAsignacion {
-    turno_id: number;
-    cuidador_id: number;
-    paciente_id: number;
-    activo?: boolean;
-}
-
-interface DatosActualizarAsignacion {
-    turno_id?: number;
-    cuidador_id?: number;
-    paciente_id?: number;
-    activo?: boolean;
-}
+import {DatosCrearAsignacion, DatosActualizarAsignacion} from '../interfaces/asignacion.interface';
 
 export const crearAsignacion = async (
     datos: DatosCrearAsignacion
@@ -21,35 +8,29 @@ export const crearAsignacion = async (
         await Turno.findByPk(
             datos.turno_id
         );
-
     if (!turno) {
         throw new Error(
             'El turno no existe'
         );
     }
-
     const cuidadora =
         await Cuidadora.findByPk(
             datos.cuidador_id
         );
-
     if (!cuidadora) {
         throw new Error(
             'La cuidadora no existe'
         );
     }
-
     const paciente =
         await Paciente.findByPk(
             datos.paciente_id
         );
-
     if (!paciente) {
         throw new Error(
             'El paciente no existe'
         );
     }
-
     const asignacionExistente =
         await Asignacion.findOne({
             where: {
@@ -61,13 +42,11 @@ export const crearAsignacion = async (
                     datos.paciente_id
             }
         });
-
     if (asignacionExistente) {
         throw new Error(
             'La asignación ya existe'
         );
     }
-
     const asignacion =
         await Asignacion.create({
             turno_id:
@@ -79,10 +58,8 @@ export const crearAsignacion = async (
             activo:
                 datos.activo ?? true
         });
-
     return asignacion;
 };
-
 export const obtenerAsignacion = async (
     id: number
 ) => {
@@ -106,16 +83,13 @@ export const obtenerAsignacion = async (
                 ]
             }
         );
-
     if (!asignacion) {
         throw new Error(
             'Asignación no encontrada'
         );
     }
-
     return asignacion;
 };
-
 export const listarAsignaciones = async () => {
     return await Asignacion.findAll({
         include: [
@@ -134,36 +108,29 @@ export const listarAsignaciones = async () => {
         ]
     });
 };
-
 export const actualizarAsignacion = async (
     id: number,
     datos: DatosActualizarAsignacion
 ) => {
     const asignacion =
         await Asignacion.findByPk(id);
-
     if (!asignacion) {
         throw new Error(
             'Asignación no encontrada'
         );
     }
-
     await asignacion.update(datos);
-
     return asignacion;
 };
-
 export const eliminarAsignacion = async (
     id: number
 ) => {
     const asignacion =
         await Asignacion.findByPk(id);
-
     if (!asignacion) {
         throw new Error(
             'Asignación no encontrada'
         );
     }
-
     await asignacion.destroy();
 };

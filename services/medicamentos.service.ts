@@ -1,16 +1,5 @@
 import {Medicamento} from '../models';
-
-interface DatosCrearMedicamento {
-    nombre: string;
-    presentacion: string;
-    cantidad: number;
-}
-
-interface DatosActualizarMedicamento {
-    nombre?: string;
-    presentacion?: string;
-    cantidad?: number;
-}
+import {DatosCrearMedicamento, DatosActualizarMedicamento} from '../interfaces/medicamento.interface';
 
 export const crearMedicamento = async (
     datos: DatosCrearMedicamento

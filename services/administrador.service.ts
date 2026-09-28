@@ -1,8 +1,5 @@
-import {Administrador, Persona} from '../models';
-
-interface DatosCrearAdministrador {
-    persona_id: number;
-}
+import { Administrador, Persona } from '../models';
+import { DatosCrearAdministrador } from '../interfaces/administrador.interface';
 
 export const crearAdministrador = async (
     datos: DatosCrearAdministrador

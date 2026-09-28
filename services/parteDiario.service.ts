@@ -1,26 +1,5 @@
 import {ParteDiario, Asignacion} from '../models';
-
-interface DatosCrearParteDiario {
-    asignacion_id: number;
-    fecha: Date;
-    animo?: string | null;
-    alimentacion?: string | null;
-    descanso?: string | null;
-    higiene?: string | null;
-    novedades?: string | null;
-    observaciones?: string | null;
-}
-
-interface DatosActualizarParteDiario {
-    asignacion_id?: number;
-    fecha?: Date;
-    animo?: string | null;
-    alimentacion?: string | null;
-    descanso?: string | null;
-    higiene?: string | null;
-    novedades?: string | null;
-    observaciones?: string | null;
-}
+import {DatosCrearParteDiario, DatosActualizarParteDiario} from '../interfaces/parteDiario.interface';
 
 export const crearParteDiario = async (
     datos: DatosCrearParteDiario

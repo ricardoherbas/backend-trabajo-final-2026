@@ -1,4 +1,3 @@
-export interface Familiar {
-    id: number;
+export interface DatosCrearFamiliar {
     persona_id: number;
 }

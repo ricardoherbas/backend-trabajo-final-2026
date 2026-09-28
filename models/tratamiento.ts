@@ -1,11 +1,7 @@
 import {DataTypes, Model, CreationOptional} from 'sequelize';
 import {sequelize} from '../config/conexion-bd';
-import {Tratamiento as TratamientoInterface} from '../interfaces/tratamiento.interface';
 
-export class Tratamiento
-    extends Model<TratamientoInterface, Partial<TratamientoInterface>>
-    implements TratamientoInterface
-{
+export class Tratamiento extends Model {
     declare id: CreationOptional<number>;
     declare paciente_id: number;
     declare medicamento_id: number;
@@ -23,50 +19,50 @@ Tratamiento.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         paciente_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         medicamento_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         dosis: {
             type: DataTypes.STRING(100),
-            allowNull: false,
+            allowNull: false
         },
         frecuencia: {
             type: DataTypes.STRING(100),
-            allowNull: false,
+            allowNull: false
         },
         horario: {
             type: DataTypes.STRING(100),
-            allowNull: true,
+            allowNull: true
         },
         desde: {
             type: DataTypes.DATEONLY,
-            allowNull: true,
+            allowNull: true
         },
         hasta: {
             type: DataTypes.DATEONLY,
-            allowNull: true,
+            allowNull: true
         },
         activa: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: true,
+            defaultValue: true
         },
         creado_en: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
-        },
+            defaultValue: DataTypes.NOW
+        }
     },
     {
         sequelize,
         tableName: 'tratamientos',
-        timestamps: false,
+        timestamps: false
     }
 );

@@ -1,11 +1,7 @@
 import {DataTypes, Model, CreationOptional} from 'sequelize';
 import {sequelize} from '../config/conexion-bd';
-import {Asignacion as AsignacionInterface} from '../interfaces/asignacion.interface';
 
-export class Asignacion
-    extends Model<AsignacionInterface, Partial<AsignacionInterface>>
-    implements AsignacionInterface
-{
+export class Asignacion extends Model {
     declare id: CreationOptional<number>;
     declare turno_id: number;
     declare cuidador_id: number;
@@ -19,34 +15,34 @@ Asignacion.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         turno_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         cuidador_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         paciente_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         activo: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: true,
+            defaultValue: true
         },
         creado_en: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
-        },
+            defaultValue: DataTypes.NOW
+        }
     },
     {
         sequelize,
         tableName: 'asignaciones',
-        timestamps: false,
+        timestamps: false
     }
 );

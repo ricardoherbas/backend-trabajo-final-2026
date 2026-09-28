@@ -1,11 +1,7 @@
 import {DataTypes, Model, CreationOptional} from 'sequelize';
 import {sequelize} from '../config/conexion-bd';
-import {VinculoFamiliar as VinculoFamiliarInterface} from '../interfaces/vinculoFamiliar.interface';
 
-export class VinculoFamiliar
-    extends Model<VinculoFamiliarInterface, Partial<VinculoFamiliarInterface>>
-    implements VinculoFamiliarInterface
-{
+export class VinculoFamiliar extends Model {
     declare id: CreationOptional<number>;
     declare familiar_id: number;
     declare paciente_id: number;
@@ -21,44 +17,44 @@ VinculoFamiliar.init(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
+            primaryKey: true
         },
         familiar_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         paciente_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
         parentesco: {
             type: DataTypes.STRING(50),
-            allowNull: false,
+            allowNull: false
         },
         es_contacto_principal: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false,
+            defaultValue: false
         },
         codigo_vinculacion: {
             type: DataTypes.STRING(100),
             allowNull: true,
-            unique: true,
+            unique: true
         },
         codigo_usado: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false,
+            defaultValue: false
         },
         creado_en: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW,
-        },
+            defaultValue: DataTypes.NOW
+        }
     },
     {
         sequelize,
         tableName: 'vinculos_familiares',
-        timestamps: false,
+        timestamps: false
     }
 );
