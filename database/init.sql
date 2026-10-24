@@ -184,6 +184,20 @@ CREATE TABLE pagos (
         UNIQUE (paciente_id,periodo)
 );
 
+CREATE TABLE tokens_recuperacion (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    expira_en TIMESTAMP NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_token_recuperacion_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE
+);
+
+
 
 CREATE OR REPLACE FUNCTION actualizar_fecha_modificacion()
 RETURNS TRIGGER AS $$
