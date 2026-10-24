@@ -1,188 +1,127 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import {Usuario, Persona, Familiar, VinculoFamiliar} from '../models';
-import {DatosRegistroFamiliar, DatosLogin} from '../interfaces/auth.interface';
+import crypto from 'crypto';
+import { Usuario, Persona, Familiar, VinculoFamiliar, TokenRecuperacion } from '../models';
+import { DatosRegistroFamiliar, DatosLogin } from '../interfaces/auth.interface';
+import transporter from '../config/conexion-email';
+import { sequelize } from '../config/conexion-bd';
 
-export const registrarFamiliar = async (
-    datos: DatosRegistroFamiliar
-) => {
-    const vinculo =
-        await VinculoFamiliar.findOne({
-            where: {
-                codigo_vinculacion:
-                    datos.codigo_vinculacion,
-                codigo_usado: false
-            }
-        });
+export const registrarFamiliar = async (datos: DatosRegistroFamiliar) => {
+    const vinculo = await VinculoFamiliar.findOne({ where: { codigo_vinculacion: datos.codigo_vinculacion, codigo_usado: false } });
     if (!vinculo) {
-        throw new Error(
-            'El código de vinculación no es válido o ya fue utilizado'
-        );
+        throw new Error('El código de vinculación no es válido o ya fue utilizado');
     }
-    const familiar =
-        await Familiar.findByPk(
-            vinculo.familiar_id
-        );
+    const familiar = await Familiar.findByPk(vinculo.familiar_id);
     if (!familiar) {
-        throw new Error(
-            'El familiar no existe'
-        );
+        throw new Error('El familiar no existe');
     }
-    const usuarioExistente =
-        await Usuario.findOne({
-            where: {
-                persona_id:
-                    familiar.persona_id
-            }
-        });
+    const usuarioExistente = await Usuario.findOne({ where: { persona_id: familiar.persona_id } });
     if (usuarioExistente) {
-        throw new Error(
-            'El familiar ya tiene una cuenta registrada'
-        );
+        throw new Error('El familiar ya tiene una cuenta registrada');
     }
-    const emailExistente =
-        await Usuario.findOne({
-            where: {
-                email: datos.email
-            }
-        });
+    const emailExistente = await Usuario.findOne({ where: { email: datos.email } });
     if (emailExistente) {
-        throw new Error(
-            'El email ya está registrado'
-        );
+        throw new Error('El email ya está registrado');
     }
-    const passwordHash =
-        await bcrypt.hash(
-            datos.password,
-            10
-        );
-    const usuario =
-        await Usuario.create({
-            persona_id:
-                familiar.persona_id,
-            email:
-                datos.email,
-            password_hash:
-                passwordHash,
-            rol:
-                'familiar',
-            activo:
-                true
-        });
-    vinculo.codigo_usado = true;
-    await vinculo.save();
-    return {
-        id:
-            usuario.id,
-        persona_id:
-            usuario.persona_id,
-        email:
-            usuario.email,
-        rol:
-            usuario.rol,
-        activo:
-            usuario.activo
-    };
+    const passwordHash = await bcrypt.hash(datos.password, 10);
+    const usuario = await sequelize.transaction(async (transaction) => {
+        const nuevoUsuario = await Usuario.create({ persona_id: familiar.persona_id, email: datos.email, password_hash: passwordHash, rol: 'familiar', activo: true }, { transaction });
+        vinculo.codigo_usado = true;
+        await vinculo.save({ transaction });
+        return nuevoUsuario;
+    });
+    return { id: usuario.id, persona_id: usuario.persona_id, email: usuario.email, rol: usuario.rol, activo: usuario.activo };
 };
-
-export const iniciarSesion = async (
-    datos: DatosLogin
-) => {
-    const usuario =
-        await Usuario.findOne({
-            where: {
-                email:
-                    datos.email
-            }
-        });
+export const iniciarSesion = async (datos: DatosLogin) => {
+    const usuario = await Usuario.findOne({ where: { email: datos.email } });
     if (!usuario) {
-        throw new Error(
-            'Email o contraseña incorrectos'
-        );
+        throw new Error('Email o contraseña incorrectos');
     }
     if (!usuario.activo) {
-        throw new Error(
-            'El usuario está inactivo'
-        );
+        throw new Error('El usuario está inactivo');
     }
-    const passwordCorrecta =
-        await bcrypt.compare(
-            datos.password,
-            usuario.password_hash
-        );
+    const passwordCorrecta = await bcrypt.compare(datos.password, usuario.password_hash);
     if (!passwordCorrecta) {
-        throw new Error(
-            'Email o contraseña incorrectos'
-        );
+        throw new Error('Email o contraseña incorrectos');
     }
-    const secreto =
-        process.env.JWT_SECRET;
+    const secreto = process.env.JWT_SECRET;
     if (!secreto) {
-        throw new Error(
-            'JWT_SECRET no configurado'
-        );
+        throw new Error('JWT_SECRET no configurado');
     }
-    const token =
-        jwt.sign(
-            {
-                id:
-                    usuario.id,
-                persona_id:
-                    usuario.persona_id,
-                rol:
-                    usuario.rol
-            },
-            secreto,
-            {
-                expiresIn:
-                    '7d'
-            }
-        );
-    return {
-        token,
-        usuario: {
-            id:
-                usuario.id,
-            persona_id:
-                usuario.persona_id,
-            email:
-                usuario.email,
-            rol:
-                usuario.rol,
-            activo:
-                usuario.activo
-        }
-    };
+    const token = jwt.sign({ id: usuario.id, persona_id: usuario.persona_id, rol: usuario.rol }, secreto, { expiresIn: '7d' });
+    return { token, usuario: { id: usuario.id, persona_id: usuario.persona_id, email: usuario.email, rol: usuario.rol, activo: usuario.activo } };
 };
-
-export const obtenerPerfil = async (
-    usuarioId: number
-) => {
-    const usuario =
-        await Usuario.findByPk(
-            usuarioId,
-            {
-                attributes: [
-                    'id',
-                    'persona_id',
-                    'email',
-                    'rol',
-                    'activo',
-                    'creado_en',
-                    'actualizado_en'
-                ],
-                include: [
-                    {
-                        model: Persona,
-                        as: 'persona'
-                    }
-                ]
-            }
-        );
+export const obtenerPerfil = async (usuarioId: number) => {
+    const usuario = await Usuario.findByPk(usuarioId, { attributes: ['id', 'persona_id', 'email', 'rol', 'activo', 'creado_en', 'actualizado_en'], include: [{ model: Persona, as: 'persona' }] });
     if (!usuario) {
-        throw new Error(
-            'Usuario no encontrado'
-        );
+        throw new Error('Usuario no encontrado');
     }
     return usuario;
+};
+export const solicitarRecuperacionPassword = async (email: string) => {
+    const respuesta = { mensaje: 'Si existe una cuenta con ese email, recibirás instrucciones para recuperar tu contraseña' };
+    const usuario = await Usuario.findOne({ where: { email, activo: true } });
+    if (!usuario) {
+        return respuesta;
+    }
+    const tokenOriginal = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(tokenOriginal).digest('hex');
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+        throw new Error('FRONTEND_URL no configurada');
+    }
+    const enlace = new URL('/restablecer-password', frontendUrl);
+    enlace.searchParams.set('token', tokenOriginal);
+    const expiraEn = new Date(Date.now() + 15 * 60 * 1000);
+    await sequelize.transaction(async (transaction) => {
+        await TokenRecuperacion.update({ usado: true }, { where: { usuario_id: usuario.id, usado: false }, transaction });
+        await TokenRecuperacion.create({ usuario_id: usuario.id, token_hash: tokenHash, expira_en: expiraEn, usado: false }, { transaction });
+    });
+    try {
+        await transporter.sendMail({ 
+            from: process.env.SMTP_USER, 
+            to: usuario.email, subject: 'Recuperación de contraseña', 
+            text: ['Recibimos una solicitud para restablecer tu contraseña.',
+            '', `Ingresá al siguiente enlace para continuar: ${enlace.toString()}`, 
+            '', 'El enlace vence en 15 minutos.', 'Si no solicitaste este cambio, podés ignorar este correo.'].join('\n'),
+             html: `<h2>Recuperación de contraseña</h2>
+             <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+             <p><a href="${enlace.toString()}">Restablecer contraseña</a></p>
+             <p>El enlace vence en 15 minutos.</p>
+             <p>Si no solicitaste este cambio, ignorá este correo.</p>` });
+    } catch {
+        await TokenRecuperacion.update({ usado: true }, { where: { usuario_id: usuario.id, token_hash: tokenHash, usado: false } });
+        throw new Error('No se pudo enviar el correo de recuperación');
+    }
+    return respuesta;
+};
+export const restablecerPassword = async (token: string, nuevaPassword: string) => {
+    if (!token || !nuevaPassword) {
+        throw new Error('El token y la nueva contraseña son obligatorios');
+    }
+    if (nuevaPassword.length < 8) {
+        throw new Error('La contraseña debe tener al menos 8 caracteres');
+    }
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    await sequelize.transaction(async (transaction) => {
+        const registro = await TokenRecuperacion.findOne({ where: { token_hash: tokenHash, usado: false }, transaction, lock: transaction.LOCK.UPDATE });
+        if (!registro) {
+            throw new Error('El enlace de recuperación no es válido o ya fue utilizado');
+        }
+        if (new Date(registro.expira_en).getTime() <= Date.now()) {
+            registro.usado = true;
+            await registro.save({ transaction });
+            throw new Error('El enlace de recuperación ha expirado');
+        }
+        const usuario = await Usuario.findByPk(registro.usuario_id, { transaction });
+        if (!usuario) {
+            throw new Error('Usuario no encontrado');
+        }
+        usuario.password_hash = await bcrypt.hash(nuevaPassword, 10);
+        await usuario.save({ transaction });
+        registro.usado = true;
+        await registro.save({ transaction });
+        await TokenRecuperacion.update({ usado: true }, { where: { usuario_id: usuario.id, usado: false }, transaction });
+    });
+    return { mensaje: 'La contraseña se restableció correctamente' };
 };
