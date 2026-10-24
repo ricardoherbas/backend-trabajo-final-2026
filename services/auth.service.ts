@@ -32,6 +32,7 @@ export const registrarFamiliar = async (datos: DatosRegistroFamiliar) => {
     });
     return { id: usuario.id, persona_id: usuario.persona_id, email: usuario.email, rol: usuario.rol, activo: usuario.activo };
 };
+
 export const iniciarSesion = async (datos: DatosLogin) => {
     const usuario = await Usuario.findOne({ where: { email: datos.email } });
     if (!usuario) {
@@ -51,6 +52,7 @@ export const iniciarSesion = async (datos: DatosLogin) => {
     const token = jwt.sign({ id: usuario.id, persona_id: usuario.persona_id, rol: usuario.rol }, secreto, { expiresIn: '7d' });
     return { token, usuario: { id: usuario.id, persona_id: usuario.persona_id, email: usuario.email, rol: usuario.rol, activo: usuario.activo } };
 };
+
 export const obtenerPerfil = async (usuarioId: number) => {
     const usuario = await Usuario.findByPk(usuarioId, { attributes: ['id', 'persona_id', 'email', 'rol', 'activo', 'creado_en', 'actualizado_en'], include: [{ model: Persona, as: 'persona' }] });
     if (!usuario) {
@@ -58,6 +60,7 @@ export const obtenerPerfil = async (usuarioId: number) => {
     }
     return usuario;
 };
+
 export const solicitarRecuperacionPassword = async (email: string) => {
     const respuesta = { mensaje: 'Si existe una cuenta con ese email, recibirás instrucciones para recuperar tu contraseña' };
     const usuario = await Usuario.findOne({ where: { email, activo: true } });
@@ -78,23 +81,20 @@ export const solicitarRecuperacionPassword = async (email: string) => {
         await TokenRecuperacion.create({ usuario_id: usuario.id, token_hash: tokenHash, expira_en: expiraEn, usado: false }, { transaction });
     });
     try {
-        await transporter.sendMail({ 
-            from: process.env.SMTP_USER, 
-            to: usuario.email, subject: 'Recuperación de contraseña', 
-            text: ['Recibimos una solicitud para restablecer tu contraseña.',
-            '', `Ingresá al siguiente enlace para continuar: ${enlace.toString()}`, 
-            '', 'El enlace vence en 15 minutos.', 'Si no solicitaste este cambio, podés ignorar este correo.'].join('\n'),
-             html: `<h2>Recuperación de contraseña</h2>
-             <p>Recibimos una solicitud para restablecer tu contraseña.</p>
-             <p><a href="${enlace.toString()}">Restablecer contraseña</a></p>
-             <p>El enlace vence en 15 minutos.</p>
-             <p>Si no solicitaste este cambio, ignorá este correo.</p>` });
+        await transporter.sendMail({
+            from: process.env.SMTP_USER,
+            to: usuario.email,
+            subject: 'Recuperación de contraseña',
+            text: ['Recibimos una solicitud para restablecer tu contraseña.', '', `Ingresá al siguiente enlace para continuar: ${enlace.toString()}`, '', 'El enlace vence en 15 minutos.', 'Si no solicitaste este cambio, podés ignorar este correo.'].join('\n'),
+            html: `<h2>Recuperación de contraseña</h2><p>Recibimos una solicitud para restablecer tu contraseña.</p><p><a href="${enlace.toString()}">Restablecer contraseña</a></p><p>El enlace vence en 15 minutos.</p><p>Si no solicitaste este cambio, ignorá este correo.</p>`
+        });
     } catch {
         await TokenRecuperacion.update({ usado: true }, { where: { usuario_id: usuario.id, token_hash: tokenHash, usado: false } });
         throw new Error('No se pudo enviar el correo de recuperación');
     }
     return respuesta;
 };
+
 export const restablecerPassword = async (token: string, nuevaPassword: string) => {
     if (!token || !nuevaPassword) {
         throw new Error('El token y la nueva contraseña son obligatorios');
@@ -103,24 +103,34 @@ export const restablecerPassword = async (token: string, nuevaPassword: string) 
         throw new Error('La contraseña debe tener al menos 8 caracteres');
     }
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const registro = await TokenRecuperacion.findOne({ where: { token_hash: tokenHash, usado: false } });
+    if (!registro) {
+        throw new Error('El enlace de recuperación no es válido o ya fue utilizado');
+    }
+    if (new Date(registro.expira_en).getTime() <= Date.now()) {
+        await TokenRecuperacion.update({ usado: true }, { where: { id: registro.id, usado: false } });
+        throw new Error('El enlace de recuperación ha expirado');
+    }
     await sequelize.transaction(async (transaction) => {
-        const registro = await TokenRecuperacion.findOne({ where: { token_hash: tokenHash, usado: false }, transaction, lock: transaction.LOCK.UPDATE });
-        if (!registro) {
+        const registroBloqueado = await TokenRecuperacion.findOne({
+            where: { id: registro.id, usado: false },
+            transaction,
+            lock: transaction.LOCK.UPDATE
+        });
+        if (!registroBloqueado) {
             throw new Error('El enlace de recuperación no es válido o ya fue utilizado');
         }
-        if (new Date(registro.expira_en).getTime() <= Date.now()) {
-            registro.usado = true;
-            await registro.save({ transaction });
+        if (new Date(registroBloqueado.expira_en).getTime() <= Date.now()) {
             throw new Error('El enlace de recuperación ha expirado');
         }
-        const usuario = await Usuario.findByPk(registro.usuario_id, { transaction });
+        const usuario = await Usuario.findByPk(registroBloqueado.usuario_id, { transaction });
         if (!usuario) {
             throw new Error('Usuario no encontrado');
         }
         usuario.password_hash = await bcrypt.hash(nuevaPassword, 10);
         await usuario.save({ transaction });
-        registro.usado = true;
-        await registro.save({ transaction });
+        registroBloqueado.usado = true;
+        await registroBloqueado.save({ transaction });
         await TokenRecuperacion.update({ usado: true }, { where: { usuario_id: usuario.id, usado: false }, transaction });
     });
     return { mensaje: 'La contraseña se restableció correctamente' };

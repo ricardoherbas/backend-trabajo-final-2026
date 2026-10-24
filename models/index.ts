@@ -12,6 +12,7 @@ export { Medicamento } from './medicamento';
 export { Tratamiento } from './tratamiento';
 export { ParteDiario } from './parteDiario';
 export { Pago } from './pago';
+export { TokenRecuperacion } from './tokenRecuperacion';
 
 // Carga las relaciones entre los modelos
 import './relaciones';
