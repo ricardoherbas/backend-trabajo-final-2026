@@ -2,7 +2,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import type { Rol } from '@/core/permissions/roles';
 
 /**
- * ÚNICA FUENTE de rutas y permisos del front.
+ * UNICA FUENTE de rutas y permisos del front.
  * Lo leen: el router, el ProtectedRoute y el Sidebar.
  * Los roles replican los verificarRol(...) de cada archivo de routes/ del backend.
  */
@@ -42,10 +42,15 @@ export const RUTAS_PRIVADAS: RutaApp[] = [
   { path: '/turnos', etiqueta: 'Turnos', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/turnos/pages/TurnosPage')) },
   { path: '/asignaciones', etiqueta: 'Asignaciones', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/asignaciones/pages/AsignacionesPage')) },
   { path: '/medicamentos', etiqueta: 'Medicamentos', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/medicamentos/pages/MedicamentosPage')) },
+
   { path: '/tratamientos', etiqueta: 'Tratamientos', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientosPage')) },
   { path: '/tratamientos/nuevo', etiqueta: 'Nuevo tratamiento', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientoFormPage')) },
   { path: '/tratamientos/:id/editar', etiqueta: 'Editar tratamiento', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientoFormPage')) },
+
   { path: '/partes-diarios', etiqueta: 'Partes diarios', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/partes-diarios/pages/PartesDiariosPage')) },
+  { path: '/partes-diarios/nuevo', etiqueta: 'Nuevo parte diario', roles: ADMIN_SEC_CUID, Componente: lazy(() => import('@/features/partes-diarios/pages/ParteDiarioFormPage')) },
+  { path: '/partes-diarios/:id/editar', etiqueta: 'Editar parte diario', roles: ADMIN_SEC_CUID, Componente: lazy(() => import('@/features/partes-diarios/pages/ParteDiarioFormPage')) },
+
   { path: '/pagos', etiqueta: 'Pagos', roles: ADMIN_SEC, menu: true, Componente: lazy(() => import('@/features/pagos/pages/PagosPage')) },
   { path: '/pagos/nuevo', etiqueta: 'Nuevo pago', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/pagos/pages/PagoFormPage')) },
   { path: '/pagos/:id/editar', etiqueta: 'Editar pago', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/pagos/pages/PagoFormPage')) },
