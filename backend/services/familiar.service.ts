@@ -1,5 +1,6 @@
 import {Familiar, Persona} from '../models';
 import {DatosCrearFamiliar} from '../interfaces/familiar.interface';
+import {AppError} from '../utils/app-error';
 
 export const crearFamiliar = async (
     datos: DatosCrearFamiliar
@@ -10,8 +11,9 @@ export const crearFamiliar = async (
         );
 
     if (!persona) {
-        throw new Error(
-            'La persona no existe'
+        throw new AppError(
+            'La persona no existe',
+            404
         );
     }
 
@@ -24,8 +26,9 @@ export const crearFamiliar = async (
         });
 
     if (familiarExistente) {
-        throw new Error(
-            'La persona ya es familiar'
+        throw new AppError(
+            'La persona ya es familiar',
+            409
         );
     }
 
@@ -55,8 +58,9 @@ export const obtenerFamiliar = async (
         );
 
     if (!familiar) {
-        throw new Error(
-            'Familiar no encontrado'
+        throw new AppError(
+            'Familiar no encontrado',
+            404
         );
     }
 
@@ -81,8 +85,9 @@ export const eliminarFamiliar = async (
         await Familiar.findByPk(id);
 
     if (!familiar) {
-        throw new Error(
-            'Familiar no encontrado'
+        throw new AppError(
+            'Familiar no encontrado',
+            404
         );
     }
 

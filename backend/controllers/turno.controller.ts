@@ -1,9 +1,17 @@
-import {Request, Response} from 'express';
-import {crearTurno, obtenerTurno, listarTurnos, actualizarTurno, eliminarTurno} from '../services/turno.service';
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+import {
+    crearTurno,
+    obtenerTurno,
+    listarTurnos,
+    actualizarTurno,
+    eliminarTurno
+} from '../services/turno.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const turno =
@@ -15,69 +23,66 @@ export const crear = async (
             turno
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear turno';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const turno =
-            await obtenerTurno(id);
+            await obtenerTurno(
+                id,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             turno
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener turno';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const turnos =
-            await listarTurnos();
+            await listarTurnos(
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             turnos
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener turnos';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +100,14 @@ export const actualizar = async (
             turno
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar turno';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +120,6 @@ export const eliminar = async (
                 'Turno eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar turno';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

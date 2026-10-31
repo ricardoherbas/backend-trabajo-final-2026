@@ -1,5 +1,10 @@
-import {Turno} from '../models';
-import {DatosCrearTurno, DatosActualizarTurno} from '../interfaces/turno.interface';
+import {Turno, Asignacion} from '../models';
+import {
+    DatosCrearTurno,
+    DatosActualizarTurno
+} from '../interfaces/turno.interface';
+import {AppError} from '../utils/app-error';
+import {obtenerCuidadoraPorPersona} from './asignacion.service';
 
 export const crearTurno = async (
     datos: DatosCrearTurno
@@ -20,21 +25,72 @@ export const crearTurno = async (
 };
 
 export const obtenerTurno = async (
-    id: number
+    id: number,
+    personaIdCuidadora?: number
 ) => {
-    const turno =
-        await Turno.findByPk(id);
+    let turno;
+
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        turno = await Turno.findOne({
+            where: {id},
+            include: [
+                {
+                    model: Asignacion,
+                    as: 'asignaciones',
+                    attributes: [],
+                    where: {
+                        cuidador_id: cuidadora.id,
+                        activo: true
+                    },
+                    required: true
+                }
+            ]
+        });
+    } else {
+        turno =
+            await Turno.findByPk(id);
+    }
 
     if (!turno) {
-        throw new Error(
-            'Turno no encontrado'
+        throw new AppError(
+            'Turno no encontrado',
+            404
         );
     }
 
     return turno;
 };
 
-export const listarTurnos = async () => {
+export const listarTurnos = async (
+    personaIdCuidadora?: number
+) => {
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        return await Turno.findAll({
+            include: [
+                {
+                    model: Asignacion,
+                    as: 'asignaciones',
+                    attributes: [],
+                    where: {
+                        cuidador_id: cuidadora.id,
+                        activo: true
+                    },
+                    required: true
+                }
+            ]
+        });
+    }
+
     return await Turno.findAll();
 };
 
@@ -46,8 +102,9 @@ export const actualizarTurno = async (
         await Turno.findByPk(id);
 
     if (!turno) {
-        throw new Error(
-            'Turno no encontrado'
+        throw new AppError(
+            'Turno no encontrado',
+            404
         );
     }
 
@@ -63,8 +120,9 @@ export const eliminarTurno = async (
         await Turno.findByPk(id);
 
     if (!turno) {
-        throw new Error(
-            'Turno no encontrado'
+        throw new AppError(
+            'Turno no encontrado',
+            404
         );
     }
 

@@ -1,9 +1,10 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 import {crearMedicamento, obtenerMedicamento, listarMedicamentos, actualizarMedicamento, eliminarMedicamento} from '../services/medicamentos.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const medicamento =
@@ -15,20 +16,14 @@ export const crear = async (
             medicamento
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear medicamento';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -41,20 +36,14 @@ export const obtener = async (
             medicamento
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener medicamento';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const medicamentos =
@@ -64,20 +53,14 @@ export const listar = async (
             medicamentos
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener medicamentos';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +78,14 @@ export const actualizar = async (
             medicamento
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar medicamento';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +98,6 @@ export const eliminar = async (
                 'Medicamento eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar medicamento';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

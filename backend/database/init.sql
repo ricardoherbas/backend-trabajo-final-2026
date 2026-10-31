@@ -1,3 +1,4 @@
+
 CREATE TABLE personas (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -6,6 +7,7 @@ CREATE TABLE personas (
     fecha_nacimiento DATE,
     telefono VARCHAR(30)
 );
+
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -21,6 +23,7 @@ CREATE TABLE usuarios (
         ON DELETE CASCADE,
     CHECK (rol IN ('administrador','secretaria','cuidadora','familiar'))
 );
+
 CREATE TABLE administradores (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -29,6 +32,7 @@ CREATE TABLE administradores (
         REFERENCES personas(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE secretarias (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -37,6 +41,7 @@ CREATE TABLE secretarias (
         REFERENCES personas(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE cuidadores (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -45,6 +50,7 @@ CREATE TABLE cuidadores (
         REFERENCES personas(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE familiares (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -53,6 +59,7 @@ CREATE TABLE familiares (
         REFERENCES personas(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE pacientes (
     id SERIAL PRIMARY KEY,
     persona_id INT NOT NULL UNIQUE,
@@ -66,6 +73,7 @@ CREATE TABLE pacientes (
         REFERENCES personas(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE vinculos_familiares (
     id SERIAL PRIMARY KEY,
     familiar_id INT NOT NULL,
@@ -74,6 +82,8 @@ CREATE TABLE vinculos_familiares (
     es_contacto_principal BOOLEAN NOT NULL DEFAULT FALSE,
     codigo_vinculacion VARCHAR(100) UNIQUE,
     codigo_usado BOOLEAN NOT NULL DEFAULT FALSE,
+    expira_en TIMESTAMP NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_vinculo_familiar
         FOREIGN KEY (familiar_id)
@@ -86,6 +96,7 @@ CREATE TABLE vinculos_familiares (
     CONSTRAINT uq_familiar_paciente
         UNIQUE (familiar_id,paciente_id)
 );
+
 CREATE TABLE turnos (
     id SERIAL PRIMARY KEY,
     dia_semana VARCHAR(15) NOT NULL,
@@ -96,6 +107,7 @@ CREATE TABLE turnos (
     CHECK (dia_semana IN ('lunes','martes','miércoles','jueves','viernes','sábado','domingo')),
     CHECK (hora_fin > hora_inicio)
 );
+
 CREATE TABLE asignaciones (
     id SERIAL PRIMARY KEY,
     turno_id INT NOT NULL,
@@ -118,6 +130,7 @@ CREATE TABLE asignaciones (
     CONSTRAINT uq_asignacion
         UNIQUE (turno_id,cuidador_id,paciente_id)
 );
+
 CREATE TABLE medicamentos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -126,6 +139,7 @@ CREATE TABLE medicamentos (
     CONSTRAINT chk_medicamento_cantidad
         CHECK (cantidad > 0)
 );
+
 CREATE TABLE tratamientos (
     id SERIAL PRIMARY KEY,
     paciente_id INT NOT NULL,
@@ -147,6 +161,7 @@ CREATE TABLE tratamientos (
         ON DELETE RESTRICT,
     CHECK (hasta IS NULL OR desde IS NULL OR hasta >= desde)
 );
+
 CREATE TABLE partes_diarios (
     id SERIAL PRIMARY KEY,
     asignacion_id INT NOT NULL,
@@ -163,6 +178,7 @@ CREATE TABLE partes_diarios (
         REFERENCES asignaciones(id)
         ON DELETE RESTRICT
 );
+
 CREATE TABLE pagos (
     id SERIAL PRIMARY KEY,
     paciente_id INT NOT NULL,
@@ -197,8 +213,6 @@ CREATE TABLE tokens_recuperacion (
         ON DELETE CASCADE
 );
 
-
-
 CREATE OR REPLACE FUNCTION actualizar_fecha_modificacion()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -206,6 +220,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 CREATE TRIGGER trg_usuarios_actualizado
 BEFORE UPDATE ON usuarios
 FOR EACH ROW
@@ -220,6 +235,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 CREATE TRIGGER trg_actualizar_estado_pago
 BEFORE INSERT OR UPDATE ON pagos
 FOR EACH ROW

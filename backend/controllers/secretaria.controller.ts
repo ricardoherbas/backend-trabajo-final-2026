@@ -1,10 +1,11 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 
 import {crearSecretaria, obtenerSecretaria, listarSecretarias, eliminarSecretaria} from '../services/secretaria.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const secretaria =
@@ -16,20 +17,14 @@ export const crear = async (
             secretaria
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear secretaria';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -42,20 +37,14 @@ export const obtener = async (
             secretaria
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener secretaria';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const secretarias =
@@ -65,20 +54,14 @@ export const listar = async (
             secretarias
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener secretarias';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -91,13 +74,6 @@ export const eliminar = async (
                 'Secretaria eliminada correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar secretaria';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

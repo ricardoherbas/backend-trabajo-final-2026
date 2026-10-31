@@ -1,9 +1,17 @@
-import {Request, Response} from 'express';
-import {crearTratamiento, obtenerTratamiento, listarTratamientos, actualizarTratamiento, eliminarTratamiento} from '../services/tratamiento.service';
+import { Response, NextFunction } from 'express';
+import { RequestAutenticado } from '../middlewares/auth.middleware';
+import {
+    crearTratamiento,
+    obtenerTratamiento,
+    listarTratamientos,
+    actualizarTratamiento,
+    eliminarTratamiento
+} from '../services/tratamiento.service';
 
 export const crear = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const tratamiento =
@@ -15,69 +23,78 @@ export const crear = async (
             tratamiento
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear tratamiento';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const tratamiento =
-            await obtenerTratamiento(id);
+            await obtenerTratamiento(
+                id,
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             tratamiento
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener tratamiento';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const tratamientos =
-            await listarTratamientos();
+            await listarTratamientos(
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             tratamientos
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener tratamientos';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +112,14 @@ export const actualizar = async (
             tratamiento
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar tratamiento';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +132,6 @@ export const eliminar = async (
                 'Tratamiento eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar tratamiento';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

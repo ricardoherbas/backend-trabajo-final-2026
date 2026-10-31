@@ -1,17 +1,37 @@
+import {Op, IncludeOptions, WhereOptions} from 'sequelize';
 import {ParteDiario, Asignacion} from '../models';
 import {DatosCrearParteDiario, DatosActualizarParteDiario} from '../interfaces/parteDiario.interface';
+import {obtenerPacientesVinculados} from './vinculoFamiliar.service';
+import {obtenerCuidadoraPorPersona} from './asignacion.service';
+import {AppError} from '../utils/app-error';
 
 export const crearParteDiario = async (
-    datos: DatosCrearParteDiario
+    datos: DatosCrearParteDiario,
+    personaIdCuidadora?: number
 ) => {
+    const whereAsignacion: WhereOptions<Asignacion> = {
+        id: datos.asignacion_id
+    };
+
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        whereAsignacion.cuidador_id =
+            cuidadora.id;
+    }
+
     const asignacion =
-        await Asignacion.findByPk(
-            datos.asignacion_id
-        );
+        await Asignacion.findOne({
+            where: whereAsignacion
+        });
 
     if (!asignacion) {
-        throw new Error(
-            'La asignación no existe'
+        throw new AppError(
+            'La asignación no existe o no pertenece a la cuidadora',
+            404
         );
     }
 
@@ -39,65 +59,167 @@ export const crearParteDiario = async (
 };
 
 export const obtenerParteDiario = async (
-    id: number
+    id: number,
+    personaIdFamiliar?: number,
+    personaIdCuidadora?: number
 ) => {
-    const parte =
-        await ParteDiario.findByPk(
-            id,
-            {
-                include: [
-                    {
-                        model: Asignacion,
-                        as: 'asignacion'
-                    }
-                ]
+    const includeAsignacion: IncludeOptions = {
+        model: Asignacion,
+        as: 'asignacion'
+    };
+
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        includeAsignacion.where = {
+            paciente_id: {
+                [Op.in]: pacienteIds
             }
-        );
+        };
+
+        includeAsignacion.required = true;
+    }
+
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        includeAsignacion.where = {
+            cuidador_id: cuidadora.id
+        };
+
+        includeAsignacion.required = true;
+    }
+
+    const parte =
+        await ParteDiario.findOne({
+            where: {id},
+            include: [
+                includeAsignacion
+            ]
+        });
 
     if (!parte) {
-        throw new Error(
-            'Parte diario no encontrado'
+        throw new AppError(
+            'Parte diario no encontrado',
+            404
         );
     }
 
     return parte;
 };
 
-export const listarPartesDiarios = async () => {
+export const listarPartesDiarios = async (
+    personaIdFamiliar?: number,
+    personaIdCuidadora?: number
+) => {
+    const includeAsignacion: IncludeOptions = {
+        model: Asignacion,
+        as: 'asignacion'
+    };
+
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        includeAsignacion.where = {
+            paciente_id: {
+                [Op.in]: pacienteIds
+            }
+        };
+
+        includeAsignacion.required = true;
+    }
+
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        includeAsignacion.where = {
+            cuidador_id: cuidadora.id
+        };
+
+        includeAsignacion.required = true;
+    }
+
     return await ParteDiario.findAll({
         include: [
-            {
-                model: Asignacion,
-                as: 'asignacion'
-            }
+            includeAsignacion
         ]
     });
 };
 
 export const actualizarParteDiario = async (
     id: number,
-    datos: DatosActualizarParteDiario
+    datos: DatosActualizarParteDiario,
+    personaIdCuidadora?: number
 ) => {
-    const parte =
-        await ParteDiario.findByPk(id);
+    let parte;
+
+    if (personaIdCuidadora !== undefined) {
+        const cuidadora =
+            await obtenerCuidadoraPorPersona(
+                personaIdCuidadora
+            );
+
+        parte = await ParteDiario.findOne({
+            where: {id},
+            include: [
+                {
+                    model: Asignacion,
+                    as: 'asignacion',
+                    where: {
+                        cuidador_id: cuidadora.id
+                    },
+                    required: true
+                }
+            ]
+        });
+    } else {
+        parte =
+            await ParteDiario.findByPk(id);
+    }
 
     if (!parte) {
-        throw new Error(
-            'Parte diario no encontrado'
+        throw new AppError(
+            'Parte diario no encontrado o no pertenece a la cuidadora',
+            404
         );
     }
 
-    if (
-        datos.asignacion_id !== undefined
-    ) {
+    if (datos.asignacion_id !== undefined) {
+        const whereAsignacion: WhereOptions<Asignacion> = {
+            id: datos.asignacion_id
+        };
+
+        if (personaIdCuidadora !== undefined) {
+            const cuidadora =
+                await obtenerCuidadoraPorPersona(
+                    personaIdCuidadora
+                );
+
+            whereAsignacion.cuidador_id =
+                cuidadora.id;
+        }
+
         const asignacion =
-            await Asignacion.findByPk(
-                datos.asignacion_id
-            );
+            await Asignacion.findOne({
+                where: whereAsignacion
+            });
 
         if (!asignacion) {
-            throw new Error(
-                'La asignación no existe'
+            throw new AppError(
+                'La asignación no existe o no pertenece a la cuidadora',
+                404
             );
         }
     }
@@ -114,8 +236,9 @@ export const eliminarParteDiario = async (
         await ParteDiario.findByPk(id);
 
     if (!parte) {
-        throw new Error(
-            'Parte diario no encontrado'
+        throw new AppError(
+            'Parte diario no encontrado',
+            404
         );
     }
 

@@ -1,9 +1,18 @@
-import {Request, Response} from 'express';
-import {crearAsignacion, obtenerAsignacion, listarAsignaciones, actualizarAsignacion, eliminarAsignacion} from '../services/asignacion.service';
+
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+import {
+    crearAsignacion,
+    obtenerAsignacion,
+    listarAsignaciones,
+    actualizarAsignacion,
+    eliminarAsignacion
+} from '../services/asignacion.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const asignacion =
@@ -15,69 +24,66 @@ export const crear = async (
             asignacion
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear asignación';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const asignacion =
-            await obtenerAsignacion(id);
+            await obtenerAsignacion(
+                id,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             asignacion
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener asignación';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const asignaciones =
-            await listarAsignaciones();
+            await listarAsignaciones(
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             asignaciones
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener asignaciones';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +101,14 @@ export const actualizar = async (
             asignacion
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar asignación';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +121,7 @@ export const eliminar = async (
                 'Asignación eliminada correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar asignación';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
+

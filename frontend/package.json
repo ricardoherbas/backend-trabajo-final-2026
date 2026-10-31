@@ -3,12 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
-  },
+ "scripts": {
+  "dev": "vite",
+  "build": "tsc --noEmit && vite build",
+  "preview": "vite preview",
+  "typecheck": "tsc --noEmit",
+  "lint": "eslint src vite.config.ts"
+},
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",

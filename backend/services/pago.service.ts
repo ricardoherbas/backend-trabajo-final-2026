@@ -1,5 +1,8 @@
+import {Op} from 'sequelize';
 import {Pago, Paciente} from '../models';
 import {DatosCrearPago, DatosActualizarPago} from '../interfaces/pago.interface';
+import {obtenerPacientesVinculados} from './vinculoFamiliar.service';
+import {AppError} from '../utils/app-error';
 
 export const crearPago = async (
     datos: DatosCrearPago
@@ -10,8 +13,9 @@ export const crearPago = async (
         );
 
     if (!paciente) {
-        throw new Error(
-            'El paciente no existe'
+        throw new AppError(
+            'El paciente no existe',
+            404
         );
     }
 
@@ -26,8 +30,9 @@ export const crearPago = async (
         });
 
     if (pagoExistente) {
-        throw new Error(
-            'Ya existe un pago para este paciente y período'
+        throw new AppError(
+            'Ya existe un pago para este paciente y período',
+            409
         );
     }
 
@@ -53,32 +58,70 @@ export const crearPago = async (
 };
 
 export const obtenerPago = async (
-    id: number
+    id: number,
+    personaIdFamiliar?: number
 ) => {
+    const where: {
+        id: number;
+        paciente_id?: {
+            [Op.in]: number[];
+        };
+    } = {id};
+
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        where.paciente_id = {
+            [Op.in]: pacienteIds
+        };
+    }
+
     const pago =
-        await Pago.findByPk(
-            id,
-            {
-                include: [
-                    {
-                        model: Paciente,
-                        as: 'paciente'
-                    }
-                ]
-            }
-        );
+        await Pago.findOne({
+            where,
+            include: [
+                {
+                    model: Paciente,
+                    as: 'paciente'
+                }
+            ]
+        });
 
     if (!pago) {
-        throw new Error(
-            'Pago no encontrado'
+        throw new AppError(
+            'Pago no encontrado',
+            404
         );
     }
 
     return pago;
 };
 
-export const listarPagos = async () => {
+export const listarPagos = async (
+    personaIdFamiliar?: number
+) => {
+    const where: {
+        paciente_id?: {
+            [Op.in]: number[];
+        };
+    } = {};
+
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        where.paciente_id = {
+            [Op.in]: pacienteIds
+        };
+    }
+
     return await Pago.findAll({
+        where,
         include: [
             {
                 model: Paciente,
@@ -96,8 +139,9 @@ export const actualizarPago = async (
         await Pago.findByPk(id);
 
     if (!pago) {
-        throw new Error(
-            'Pago no encontrado'
+        throw new AppError(
+            'Pago no encontrado',
+            404
         );
     }
 
@@ -108,8 +152,9 @@ export const actualizarPago = async (
             );
 
         if (!paciente) {
-            throw new Error(
-                'El paciente no existe'
+            throw new AppError(
+                'El paciente no existe',
+                404
             );
         }
     }
@@ -126,8 +171,9 @@ export const eliminarPago = async (
         await Pago.findByPk(id);
 
     if (!pago) {
-        throw new Error(
-            'Pago no encontrado'
+        throw new AppError(
+            'Pago no encontrado',
+            404
         );
     }
 
