@@ -1,5 +1,6 @@
 import {Medicamento} from '../models';
 import {DatosCrearMedicamento, DatosActualizarMedicamento} from '../interfaces/medicamento.interface';
+import {AppError} from '../utils/app-error';
 
 export const crearMedicamento = async (
     datos: DatosCrearMedicamento
@@ -24,8 +25,9 @@ export const obtenerMedicamento = async (
         await Medicamento.findByPk(id);
 
     if (!medicamento) {
-        throw new Error(
-            'Medicamento no encontrado'
+        throw new AppError(
+            'Medicamento no encontrado',
+            404
         );
     }
 
@@ -44,8 +46,9 @@ export const actualizarMedicamento = async (
         await Medicamento.findByPk(id);
 
     if (!medicamento) {
-        throw new Error(
-            'Medicamento no encontrado'
+        throw new AppError(
+            'Medicamento no encontrado',
+            404
         );
     }
 
@@ -61,8 +64,9 @@ export const eliminarMedicamento = async (
         await Medicamento.findByPk(id);
 
     if (!medicamento) {
-        throw new Error(
-            'Medicamento no encontrado'
+        throw new AppError(
+            'Medicamento no encontrado',
+            404
         );
     }
 

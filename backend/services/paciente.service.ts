@@ -1,5 +1,12 @@
+import {Op} from 'sequelize';
 import {Paciente, Persona} from '../models';
-import {DatosCrearPaciente, DatosActualizarPaciente} from '../interfaces/paciente.interface';
+import {
+    DatosCrearPaciente,
+    DatosActualizarPaciente
+} from '../interfaces/paciente.interface';
+import {obtenerPacientesVinculados} from './vinculoFamiliar.service';
+import {obtenerPacientesAsignados} from './asignacion.service';
+import {AppError} from '../utils/app-error';
 
 export const crearPaciente = async (
     datos: DatosCrearPaciente
@@ -10,8 +17,9 @@ export const crearPaciente = async (
         );
 
     if (!persona) {
-        throw new Error(
-            'La persona no existe'
+        throw new AppError(
+            'La persona no existe',
+            404
         );
     }
 
@@ -24,8 +32,9 @@ export const crearPaciente = async (
         });
 
     if (pacienteExistente) {
-        throw new Error(
-            'La persona ya es paciente'
+        throw new AppError(
+            'La persona ya es paciente',
+            409
         );
     }
 
@@ -47,8 +56,38 @@ export const crearPaciente = async (
 };
 
 export const obtenerPaciente = async (
-    id: number
+    id: number,
+    personaIdFamiliar?: number,
+    personaIdCuidadora?: number
 ) => {
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        if (!pacienteIds.includes(id)) {
+            throw new AppError(
+                'Paciente no encontrado',
+                404
+            );
+        }
+    }
+
+    if (personaIdCuidadora !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesAsignados(
+                personaIdCuidadora
+            );
+
+        if (!pacienteIds.includes(id)) {
+            throw new AppError(
+                'Paciente no encontrado',
+                404
+            );
+        }
+    }
+
     const paciente =
         await Paciente.findByPk(
             id,
@@ -63,16 +102,49 @@ export const obtenerPaciente = async (
         );
 
     if (!paciente) {
-        throw new Error(
-            'Paciente no encontrado'
+        throw new AppError(
+            'Paciente no encontrado',
+            404
         );
     }
 
     return paciente;
 };
 
-export const listarPacientes = async () => {
+export const listarPacientes = async (
+    personaIdFamiliar?: number,
+    personaIdCuidadora?: number
+) => {
+    let where = {};
+
+    if (personaIdFamiliar !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesVinculados(
+                personaIdFamiliar
+            );
+
+        where = {
+            id: {
+                [Op.in]: pacienteIds
+            }
+        };
+    }
+
+    if (personaIdCuidadora !== undefined) {
+        const pacienteIds =
+            await obtenerPacientesAsignados(
+                personaIdCuidadora
+            );
+
+        where = {
+            id: {
+                [Op.in]: pacienteIds
+            }
+        };
+    }
+
     return await Paciente.findAll({
+        where,
         include: [
             {
                 model: Persona,
@@ -90,8 +162,9 @@ export const actualizarPaciente = async (
         await Paciente.findByPk(id);
 
     if (!paciente) {
-        throw new Error(
-            'Paciente no encontrado'
+        throw new AppError(
+            'Paciente no encontrado',
+            404
         );
     }
 
@@ -107,8 +180,9 @@ export const eliminarPaciente = async (
         await Paciente.findByPk(id);
 
     if (!paciente) {
-        throw new Error(
-            'Paciente no encontrado'
+        throw new AppError(
+            'Paciente no encontrado',
+            404
         );
     }
 

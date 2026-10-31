@@ -1,5 +1,7 @@
-import { Administrador, Persona } from '../models';
-import { DatosCrearAdministrador } from '../interfaces/administrador.interface';
+
+import {Administrador, Persona} from '../models';
+import {DatosCrearAdministrador} from '../interfaces/administrador.interface';
+import {AppError} from '../utils/app-error';
 
 export const crearAdministrador = async (
     datos: DatosCrearAdministrador
@@ -10,8 +12,9 @@ export const crearAdministrador = async (
         );
 
     if (!persona) {
-        throw new Error(
-            'La persona no existe'
+        throw new AppError(
+            'La persona no existe',
+            404
         );
     }
 
@@ -24,8 +27,9 @@ export const crearAdministrador = async (
         });
 
     if (administradorExistente) {
-        throw new Error(
-            'La persona ya es administrador'
+        throw new AppError(
+            'La persona ya es administrador',
+            409
         );
     }
 
@@ -55,8 +59,9 @@ export const obtenerAdministrador = async (
         );
 
     if (!administrador) {
-        throw new Error(
-            'Administrador no encontrado'
+        throw new AppError(
+            'Administrador no encontrado',
+            404
         );
     }
 
@@ -81,8 +86,9 @@ export const eliminarAdministrador = async (
         await Administrador.findByPk(id);
 
     if (!administrador) {
-        throw new Error(
-            'Administrador no encontrado'
+        throw new AppError(
+            'Administrador no encontrado',
+            404
         );
     }
 

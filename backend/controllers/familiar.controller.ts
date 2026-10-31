@@ -1,10 +1,11 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 
 import {crearFamiliar, obtenerFamiliar, listarFamiliares, eliminarFamiliar} from '../services/familiar.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const familiar =
@@ -16,20 +17,14 @@ export const crear = async (
             familiar
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear familiar';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -42,20 +37,14 @@ export const obtener = async (
             familiar
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener familiar';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const familiares =
@@ -65,20 +54,14 @@ export const listar = async (
             familiares
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener familiares';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -91,13 +74,6 @@ export const eliminar = async (
                 'Familiar eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar familiar';
-
-        res.status(404).json({
-            mensaje
-        }); 
-    } 
+        next(error);
+    }
 };

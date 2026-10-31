@@ -9,6 +9,8 @@ export class VinculoFamiliar extends Model {
     declare es_contacto_principal: boolean;
     declare codigo_vinculacion: string | null;
     declare codigo_usado: boolean;
+    declare expira_en: Date;
+    declare activo: boolean;
     declare creado_en: CreationOptional<Date>;
 }
 
@@ -45,6 +47,15 @@ VinculoFamiliar.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        expira_en: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        activo: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
         },
         creado_en: {
             type: DataTypes.DATE,

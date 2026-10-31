@@ -1,10 +1,16 @@
-import {Request, Response} from 'express';
 
-import {crearAdministrador, obtenerAdministrador, listarAdministradores, eliminarAdministrador} from '../services/administrador.service';
+import {Request, Response, NextFunction} from 'express';
+import {
+    crearAdministrador,
+    obtenerAdministrador,
+    listarAdministradores,
+    eliminarAdministrador
+} from '../services/administrador.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const administrador =
@@ -16,20 +22,14 @@ export const crear = async (
             administrador
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear administrador';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -42,20 +42,14 @@ export const obtener = async (
             administrador
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener administrador';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const administradores =
@@ -65,20 +59,14 @@ export const listar = async (
             administradores
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener administradores';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -91,13 +79,6 @@ export const eliminar = async (
                 'Administrador eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar administrador';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

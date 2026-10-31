@@ -7,8 +7,8 @@ import {validarPago} from '../validators/pago.validator';
 const router = Router();
 
 router.post('/', verificarToken, verificarRol('administrador', 'secretaria'), validarPago, crear);
-router.get('/', verificarToken, verificarRol('administrador', 'secretaria'), listar);
-router.get('/:id', verificarToken, verificarRol('administrador', 'secretaria'), obtener);
+router.get('/', verificarToken, verificarRol('administrador', 'secretaria', 'familiar'), listar);
+router.get('/:id', verificarToken, verificarRol('administrador', 'secretaria', 'familiar'), obtener);
 router.put('/:id', verificarToken, verificarRol('administrador', 'secretaria'), validarPago, actualizar);
 router.delete('/:id', verificarToken, verificarRol('administrador'), eliminar);
 

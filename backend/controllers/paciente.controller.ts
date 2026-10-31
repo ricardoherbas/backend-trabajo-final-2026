@@ -1,9 +1,17 @@
-import {Request, Response} from 'express';
-import {crearPaciente, obtenerPaciente, listarPacientes, actualizarPaciente, eliminarPaciente} from '../services/paciente.service';
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+import {
+    crearPaciente,
+    obtenerPaciente,
+    listarPacientes,
+    actualizarPaciente,
+    eliminarPaciente
+} from '../services/paciente.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const paciente =
@@ -15,69 +23,78 @@ export const crear = async (
             paciente
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear paciente';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const paciente =
-            await obtenerPaciente(id);
+            await obtenerPaciente(
+                id,
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             paciente
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener paciente';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const pacientes =
-            await listarPacientes();
+            await listarPacientes(
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             pacientes
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener pacientes';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +112,14 @@ export const actualizar = async (
             paciente
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar paciente';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +132,6 @@ export const eliminar = async (
                 'Paciente eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar paciente';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

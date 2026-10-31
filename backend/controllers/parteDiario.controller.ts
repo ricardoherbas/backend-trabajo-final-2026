@@ -1,13 +1,29 @@
-import {Request, Response} from 'express';
-import {crearParteDiario, obtenerParteDiario, listarPartesDiarios, actualizarParteDiario, eliminarParteDiario} from '../services/parteDiario.service';
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+import {
+    crearParteDiario,
+    obtenerParteDiario,
+    listarPartesDiarios,
+    actualizarParteDiario,
+    eliminarParteDiario
+} from '../services/parteDiario.service';
 
 export const crear = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const parte =
-            await crearParteDiario(req.body);
+            await crearParteDiario(
+                req.body,
+                personaIdCuidadora
+            );
 
         res.status(201).json({
             mensaje:
@@ -15,78 +31,93 @@ export const crear = async (
             parte
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear parte diario';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const parte =
-            await obtenerParteDiario(id);
+            await obtenerParteDiario(
+                id,
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             parte
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener parte diario';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const partes =
-            await listarPartesDiarios();
+            await listarPartesDiarios(
+                personaIdFamiliar,
+                personaIdCuidadora
+            );
 
         res.status(200).json(
             partes
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener partes diarios';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdCuidadora =
+            req.usuario?.rol === 'cuidadora'
+                ? req.usuario.persona_id
+                : undefined;
+
         const parte =
             await actualizarParteDiario(
                 id,
-                req.body
+                req.body,
+                personaIdCuidadora
             );
 
         res.status(200).json({
@@ -95,20 +126,14 @@ export const actualizar = async (
             parte
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar parte diario';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +146,6 @@ export const eliminar = async (
                 'Parte diario eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar parte diario';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

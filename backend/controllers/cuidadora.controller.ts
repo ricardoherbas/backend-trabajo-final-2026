@@ -1,10 +1,11 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 
 import {crearCuidadora, obtenerCuidadora, listarCuidadoras, eliminarCuidadora} from '../services/cuidadora.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const cuidadora =
@@ -16,20 +17,14 @@ export const crear = async (
             cuidadora
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear cuidadora';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -42,20 +37,14 @@ export const obtener = async (
             cuidadora
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener cuidadora';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const cuidadoras =
@@ -65,20 +54,14 @@ export const listar = async (
             cuidadoras
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener cuidadoras';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -91,13 +74,6 @@ export const eliminar = async (
                 'Cuidadora eliminada correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar cuidadora';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

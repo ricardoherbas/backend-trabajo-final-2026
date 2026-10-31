@@ -1,9 +1,17 @@
-import {Request, Response} from 'express';
-import {crearVinculoFamiliar, obtenerVinculoFamiliar, listarVinculosFamiliares, actualizarVinculoFamiliar, eliminarVinculoFamiliar} from '../services/vinculoFamiliar.service';
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+import {crearVinculoFamiliar,
+    obtenerVinculoFamiliar,
+    listarVinculosFamiliares,
+    actualizarVinculoFamiliar,
+    desactivarVinculoFamiliar,
+    activarVinculoFamiliar
+} from '../services/vinculoFamiliar.service';
 
 export const crear = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const vinculo =
@@ -12,49 +20,53 @@ export const crear = async (
         res.status(201).json({
             mensaje:
                 'Vínculo familiar creado correctamente',
-            vinculo
+            vinculo: {
+                id: vinculo.id,
+                familiar_id: vinculo.familiar_id,
+                paciente_id: vinculo.paciente_id,
+                parentesco: vinculo.parentesco,
+                es_contacto_principal: vinculo.es_contacto_principal,
+                codigo_vinculacion: vinculo.codigo_vinculacion,
+                expira_en: vinculo.expira_en
+            }
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear vínculo familiar';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
         const vinculo =
-            await obtenerVinculoFamiliar(id);
+            await obtenerVinculoFamiliar(
+                id,
+                personaIdFamiliar
+            );
 
         res.status(200).json(
             vinculo
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener vínculo familiar';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const vinculos =
@@ -64,20 +76,14 @@ export const listar = async (
             vinculos
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener vínculos familiares';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,39 +101,60 @@ export const actualizar = async (
             vinculo
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar vínculo familiar';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
-export const eliminar = async (
+export const desactivar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
-        await eliminarVinculoFamiliar(id);
+        const vinculo =
+            await desactivarVinculoFamiliar(id);
 
         res.status(200).json({
             mensaje:
-                'Vínculo familiar eliminado correctamente'
+                'Vínculo familiar desactivado correctamente',
+            vinculo: {
+                id: vinculo.id,
+                familiar_id: vinculo.familiar_id,
+                paciente_id: vinculo.paciente_id,
+                activo: vinculo.activo
+            }
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar vínculo familiar';
+        next(error);
+    }
+};
 
-        res.status(404).json({
-            mensaje
+export const activar = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const id =
+            Number(req.params.id);
+
+        const vinculo =
+            await activarVinculoFamiliar(id);
+
+        res.status(200).json({
+            mensaje:
+                'Vínculo familiar activado correctamente',
+            vinculo: {
+                id: vinculo.id,
+                familiar_id: vinculo.familiar_id,
+                paciente_id: vinculo.paciente_id,
+                activo: vinculo.activo
+            }
         });
+    } catch (error) {
+        next(error);
     }
 };

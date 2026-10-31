@@ -1,5 +1,6 @@
 import {Secretaria, Persona} from '../models';
 import {DatosCrearSecretaria} from '../interfaces/secretaria.interface';
+import {AppError} from '../utils/app-error';
 
 export const crearSecretaria = async (
     datos: DatosCrearSecretaria
@@ -10,8 +11,9 @@ export const crearSecretaria = async (
         );
 
     if (!persona) {
-        throw new Error(
-            'La persona no existe'
+        throw new AppError(
+            'La persona no existe',
+            404
         );
     }
 
@@ -24,8 +26,9 @@ export const crearSecretaria = async (
         });
 
     if (secretariaExistente) {
-        throw new Error(
-            'La persona ya es secretaria'
+        throw new AppError(
+            'La persona ya es secretaria',
+            409
         );
     }
 
@@ -55,8 +58,9 @@ export const obtenerSecretaria = async (
         );
 
     if (!secretaria) {
-        throw new Error(
-            'Secretaria no encontrada'
+        throw new AppError(
+            'Secretaria no encontrada',
+            404
         );
     }
 
@@ -81,8 +85,9 @@ export const eliminarSecretaria = async (
         await Secretaria.findByPk(id);
 
     if (!secretaria) {
-        throw new Error(
-            'Secretaria no encontrada'
+        throw new AppError(
+            'Secretaria no encontrada',
+            404
         );
     }
 

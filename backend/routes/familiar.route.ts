@@ -6,9 +6,9 @@ import {validarFamiliar} from '../validators/familiar.validator';
 
 const router = Router();
 
-router.post('/', verificarToken, verificarRol('administrador'), validarFamiliar, crear);
-router.get('/', verificarToken, verificarRol('administrador'), listar);
-router.get('/:id', verificarToken, verificarRol('administrador'), obtener);
+router.post('/', verificarToken, verificarRol('administrador', 'secretaria'), validarFamiliar, crear);
+router.get('/', verificarToken, verificarRol('administrador', 'secretaria'), listar);
+router.get('/:id', verificarToken, verificarRol('administrador', 'secretaria'), obtener);
 router.delete('/:id', verificarToken, verificarRol('administrador'), eliminar);
 
 export default router;

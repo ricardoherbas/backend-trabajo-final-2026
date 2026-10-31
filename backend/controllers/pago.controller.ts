@@ -1,9 +1,11 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
+import {RequestAutenticado} from '../middlewares/auth.middleware';
 import {crearPago, obtenerPago, listarPagos, actualizarPago, eliminarPago} from '../services/pago.service';
 
 export const crear = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const pago =
@@ -15,69 +17,66 @@ export const crear = async (
             pago
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al crear pago';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const obtener = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
             Number(req.params.id);
 
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
         const pago =
-            await obtenerPago(id);
+            await obtenerPago(
+                id,
+                personaIdFamiliar
+            );
 
         res.status(200).json(
             pago
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener pago';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const listar = async (
-    req: Request,
-    res: Response
+    req: RequestAutenticado,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
+        const personaIdFamiliar =
+            req.usuario?.rol === 'familiar'
+                ? req.usuario.persona_id
+                : undefined;
+
         const pagos =
-            await listarPagos();
+            await listarPagos(
+                personaIdFamiliar
+            );
 
         res.status(200).json(
             pagos
         );
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al obtener pagos';
-
-        res.status(500).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const actualizar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -95,20 +94,14 @@ export const actualizar = async (
             pago
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al actualizar pago';
-
-        res.status(400).json({
-            mensaje
-        });
+        next(error);
     }
 };
 
 export const eliminar = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
     try {
         const id =
@@ -121,13 +114,6 @@ export const eliminar = async (
                 'Pago eliminado correctamente'
         });
     } catch (error) {
-        const mensaje =
-            error instanceof Error
-                ? error.message
-                : 'Error al eliminar pago';
-
-        res.status(404).json({
-            mensaje
-        });
+        next(error);
     }
 };

@@ -1,52 +1,22 @@
 {
   "name": "backend-trabajo-final-2026",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js",
-    "seed": "ts-node-dev --transpile-only database/seeds/admin.seed.ts",
-    "lint": "eslint .",
-    "prepare": "husky install",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ricardoherbas/backend-trabajo-final-2026.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/ricardoherbas/backend-trabajo-final-2026/issues"
-  },
-  "homepage": "https://github.com/ricardoherbas/backend-trabajo-final-2026#readme",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^18.0.3",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "nodemailer": "^10.2.1",
-    "pg": "^8.23.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+    "prepare": "husky",
+    "lint:backend": "npm run lint --prefix backend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.6.2",
-    "@types/nodemailer": "^8.0.2",
-    "eslint": "^10.11.0",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
     "husky": "^9.1.7",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.72.1"
   }
 }
