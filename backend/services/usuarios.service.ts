@@ -425,7 +425,17 @@ export const actualizarUsuario = async (
 };
 
 // Desactiva una cuenta sin eliminar registros.
-export const desactivarUsuario = async (id: number) => {
+export const desactivarUsuario = async (
+    id: number,
+    usuarioAutenticadoId: number
+) => {
+    if (id === usuarioAutenticadoId) {
+        throw new AppError(
+            'No podés desactivar tu propia cuenta',
+            409
+        );
+    }
+
     const usuario = await Usuario.findByPk(id);
 
     if (!usuario) {

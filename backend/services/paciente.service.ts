@@ -1,4 +1,3 @@
-
 import {Op} from 'sequelize';
 import {Paciente, Persona} from '../models';
 import {
@@ -96,7 +95,11 @@ export const obtenerPaciente = async (
                 include: [
                     {
                         model: Persona,
-                        as: 'persona'
+                        as: 'persona',
+                        attributes: [
+                            'nombre',
+                            'apellido'
+                        ]
                     }
                 ]
             }
@@ -149,7 +152,11 @@ export const listarPacientes = async (
         include: [
             {
                 model: Persona,
-                as: 'persona'
+                as: 'persona',
+                attributes: [
+                    'nombre',
+                    'apellido'
+                ]
             }
         ]
     });

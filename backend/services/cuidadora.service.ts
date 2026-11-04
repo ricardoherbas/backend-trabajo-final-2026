@@ -51,7 +51,11 @@ export const obtenerCuidadora = async (
                 include: [
                     {
                         model: Persona,
-                        as: 'persona'
+                        as: 'persona',
+                        attributes: [
+                            'nombre',
+                            'apellido'
+                        ]
                     }
                 ]
             }
@@ -72,7 +76,11 @@ export const listarCuidadoras = async () => {
         include: [
             {
                 model: Persona,
-                as: 'persona'
+                as: 'persona',
+                attributes: [
+                    'nombre',
+                    'apellido'
+                ]
             }
         ]
     });
