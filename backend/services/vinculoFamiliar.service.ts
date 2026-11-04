@@ -1,5 +1,6 @@
 
 import {randomBytes} from 'crypto';
+import {sequelize} from '../config/conexion-bd';
 import {VinculoFamiliar, Familiar, Paciente} from '../models';
 import {DatosCrearVinculo, DatosActualizarVinculo} from '../interfaces/vinculoFamiliar.interface';
 import {AppError} from '../utils/app-error';
@@ -79,6 +80,59 @@ export const crearVinculoFamiliar = async (
         });
 
     return vinculo;
+};
+
+export const regenerarCodigoVinculacion = async (
+    id: number
+) => {
+    return await sequelize.transaction(async (transaction) => {
+        const vinculo =
+            await VinculoFamiliar.findByPk(
+                id,
+                {
+                    transaction,
+                    lock: transaction.LOCK.UPDATE
+                }
+            );
+
+        if (!vinculo) {
+            throw new AppError(
+                'Vínculo familiar no encontrado',
+                404
+            );
+        }
+
+        if (!vinculo.activo) {
+            throw new AppError(
+                'No se puede regenerar el código de un vínculo inactivo',
+                409
+            );
+        }
+
+        if (vinculo.codigo_usado) {
+            throw new AppError(
+                'No se puede regenerar un código que ya fue utilizado',
+                409
+            );
+        }
+
+        const nuevoCodigo =
+            generarTokenVinculacion();
+
+        const nuevaExpiracion =
+            new Date(Date.now() + 2 * 60 * 60 * 1000);
+
+        await vinculo.update(
+            {
+                codigo_vinculacion: nuevoCodigo,
+                expira_en: nuevaExpiracion,
+                codigo_usado: false
+            },
+            {transaction}
+        );
+
+        return vinculo;
+    });
 };
 
 export const obtenerVinculoFamiliar = async (

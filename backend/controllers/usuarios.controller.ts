@@ -9,6 +9,8 @@ import {
     activarUsuario
 } from '../services/usuarios.service';
 
+import {RequestAutenticado} from '../middlewares/auth.middleware';
+
 // Crear un usuario.
 export const crear = async (
     req: Request,
@@ -88,14 +90,20 @@ export const actualizar = async (
 
 // Desactivar un usuario.
 export const desactivar = async (
-    req: Request,
+    req: RequestAutenticado,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
         const id = Number(req.params.id);
 
-        const usuario = await desactivarUsuario(id);
+        const usuarioAutenticadoId =
+            req.usuario!.id;
+
+        const usuario = await desactivarUsuario(
+            id,
+            usuarioAutenticadoId
+        );
 
         res.status(200).json({
             mensaje: 'Usuario desactivado correctamente',

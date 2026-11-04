@@ -1,3 +1,4 @@
+
 import {Request, Response, NextFunction} from 'express';
 import {RequestAutenticado} from '../middlewares/auth.middleware';
 import {crearVinculoFamiliar,
@@ -5,7 +6,8 @@ import {crearVinculoFamiliar,
     listarVinculosFamiliares,
     actualizarVinculoFamiliar,
     desactivarVinculoFamiliar,
-    activarVinculoFamiliar
+    activarVinculoFamiliar,
+    regenerarCodigoVinculacion
 } from '../services/vinculoFamiliar.service';
 
 export const crear = async (
@@ -99,6 +101,31 @@ export const actualizar = async (
             mensaje:
                 'Vínculo familiar actualizado correctamente',
             vinculo
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const regenerarCodigo = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const id =
+            Number(req.params.id);
+
+        const vinculo =
+            await regenerarCodigoVinculacion(id);
+
+        res.status(200).json({
+            mensaje:
+                'Código de vinculación regenerado correctamente',
+            vinculo: {
+                codigo_vinculacion: vinculo.codigo_vinculacion,
+                expira_en: vinculo.expira_en
+            }
         });
     } catch (error) {
         next(error);
