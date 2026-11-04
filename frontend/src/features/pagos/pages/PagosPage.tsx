@@ -21,6 +21,8 @@ import type { Pago } from '../interfaces/pago.interface';
 
 export default function PagosPage() {
   const { rol } = useAuth();
+  // El familiar (solo lectura) no ve alta, edición ni cobro.
+  const puedeEditar = tieneRol(rol, ['administrador', 'secretaria']);
   const puedeEliminar = tieneRol(rol, ['administrador']);
 
   const { data, isLoading, error } = usePagos();
@@ -62,7 +64,7 @@ export default function PagosPage() {
       <PageHeader
         titulo="Pagos"
         descripcion="Seguimiento mensual de cobros por paciente."
-        accion={<Link className="btn btn-primario" to="/pagos/nuevo">Nuevo pago</Link>}
+        accion={puedeEditar ? <Link className="btn btn-primario" to="/pagos/nuevo">Nuevo pago</Link> : undefined}
       />
 
       <dl className="resumen">
@@ -97,7 +99,7 @@ export default function PagosPage() {
               { titulo: 'Medio', render: (p) => (p.medio_pago ? ETIQUETA_MEDIO_PAGO[p.medio_pago] : '—') },
               { titulo: 'Fecha de pago', render: (p) => formatFecha(p.fecha_pago) },
             ]}
-            acciones={(p) => (
+            acciones={puedeEditar ? (p) => (
               <>
                 {p.estado !== 'pagado' && (
                   <Button variante="texto" chico onClick={() => { setErrorCobro(null); setACobrar(p); }}>Registrar cobro</Button>
@@ -105,12 +107,12 @@ export default function PagosPage() {
                 <Link className="btn btn-texto btn-chico" to={`/pagos/${p.id}/editar`}>Editar</Link>
                 {puedeEliminar && <Button variante="texto" chico onClick={() => setAEliminar(p)}>Eliminar</Button>}
               </>
-            )}
+            ) : undefined}
           />
         </StateView>
       </div>
 
-      <RegistrarCobroModal
+      {puedeEditar && <RegistrarCobroModal
         pago={aCobrar}
         nombrePaciente={aCobrar ? pacientes.nombreDe(aCobrar.paciente_id) : ''}
         enviando={guardar.isPending}
@@ -124,7 +126,7 @@ export default function PagosPage() {
             { onSuccess: () => setACobrar(null), onError: (e) => setErrorCobro(obtenerMensajeError(e)) },
           );
         }}
-      />
+      />}
 
       <ConfirmDialog
         abierto={aEliminar !== null}

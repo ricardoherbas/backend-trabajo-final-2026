@@ -50,8 +50,8 @@ export default function AsignacionesPage() {
             filas={data ?? []}
             clave={(a) => a.id}
             columnas={[
-              { titulo: 'Paciente', render: (a) => nombres.paciente(a.paciente_id) },
-              { titulo: 'Cuidadora', render: (a) => nombres.cuidadora(a.cuidador_id) },
+              { titulo: 'Paciente', render: (a) => nombres.paciente(a.paciente_id, a.paciente?.persona) },
+              { titulo: 'Cuidadora', render: (a) => nombres.cuidadora(a.cuidador_id, a.cuidadora?.persona) },
               { titulo: 'Turno', render: (a) => (a.turno ? etiquetaTurno(a.turno) : `Turno #${a.turno_id}`) },
               { titulo: 'Estado', render: (a) => <Badge tono={a.activo ? 'ok' : 'neutro'}>{a.activo ? 'Activa' : 'Inactiva'}</Badge> },
             ]}

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { usePacientes } from '@/features/pacientes/hooks/usePacientes';
 import { nombreCompleto } from '@/features/pacientes/adapters/paciente.adapter';
 import { cuidadoraService } from '@/features/cuidadoras/services/cuidadora.service';
-import type { Nombres } from '../adapters/asignacion.adapter';
+import { nombrePersona, type Nombres } from '../adapters/asignacion.adapter';
 
 /**
  * Lista de cuidadoras. GET /cuidadoras es solo de administrador, por eso retry:false:
@@ -14,9 +14,10 @@ export const useCuidadorasLista = () =>
   useQuery({ queryKey: ['cuidadoras'], queryFn: cuidadoraService.listar, retry: false });
 
 /**
- * El back NO anida la persona dentro de asignacion.paciente ni asignacion.cuidadora,
- * así que los nombres se resuelven cruzando con las listas de pacientes y cuidadoras.
- * Si el rol no puede cargar alguna lista, se muestra el ID como respaldo.
+ * El back anida la persona (solo nombre y apellido) en asignacion.paciente y
+ * asignacion.cuidadora: se usa primero. Si no viene, se resuelve por ID cruzando
+ * con las listas de pacientes y cuidadoras, y si el rol no puede cargarlas se
+ * muestra "Paciente #id" / "Cuidadora #id".
  */
 export function useNombres(): Nombres {
   const pacientes = usePacientes();
@@ -38,7 +39,7 @@ export function useNombres(): Nombres {
   );
 
   return {
-    paciente: (id) => porPaciente.get(id) ?? `Paciente #${id}`,
-    cuidadora: (id) => porCuidadora.get(id) ?? `Cuidadora #${id}`,
+    paciente: (id, persona) => nombrePersona(persona) ?? porPaciente.get(id) ?? `Paciente #${id}`,
+    cuidadora: (id, persona) => nombrePersona(persona) ?? porCuidadora.get(id) ?? `Cuidadora #${id}`,
   };
 }

@@ -1,6 +1,18 @@
 import type { Turno } from '@/features/turnos/interfaces/turno.interface';
-import type { Paciente } from '@/features/pacientes/interfaces/paciente.interface';
-import type { Cuidadora } from '@/features/cuidadoras/interfaces/cuidadora.interface';
+import type { Persona } from '@/core/types/persona.interface';
+
+/** El backend anida solo nombre y apellido (sin DNI, teléfono ni fecha de nacimiento). */
+export type PersonaResumen = Pick<Persona, 'nombre' | 'apellido'>;
+
+/** Paciente / cuidadora tal como vienen anidados en una asignación. */
+export interface PacienteAsignado {
+  id?: number;
+  persona?: PersonaResumen | null;
+}
+export interface CuidadoraAsignada {
+  id?: number;
+  persona?: PersonaResumen | null;
+}
 
 export interface Asignacion {
   id: number;
@@ -10,8 +22,8 @@ export interface Asignacion {
   activo: boolean;
   creado_en: string;
   turno?: Turno;
-  cuidadora?: Cuidadora;
-  paciente?: Paciente;
+  cuidadora?: CuidadoraAsignada;
+  paciente?: PacienteAsignado;
 }
 export interface DatosCrearAsignacion {
   turno_id: number;

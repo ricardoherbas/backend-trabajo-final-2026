@@ -1,5 +1,5 @@
-import type { Paciente, DatosActualizarPaciente } from '../interfaces/paciente.interface';
-import type { PacienteForm } from '../validators/paciente.validator';
+import type { Paciente, DatosActualizarPaciente, DatosCrearPaciente } from '../interfaces/paciente.interface';
+import type { PacienteAltaForm, PacienteForm } from '../validators/paciente.validator';
 
 /** Une persona + paciente en datos listos para mostrar. */
 export const nombreCompleto = (p: Paciente): string =>
@@ -20,4 +20,12 @@ export const pacienteAFormulario = (p: Paciente): PacienteForm => ({
   obra_social: p.obra_social ?? '',
   observaciones: p.observaciones ?? '',
   activo: p.activo,
+});
+
+/** Parte "paciente" del formulario de alta, con el persona_id ya creado ('' → null). */
+export const altaAPayloadPerfil = (f: PacienteAltaForm, personaId: number): DatosCrearPaciente => ({
+  persona_id: personaId,
+  direccion: f.direccion?.trim() || null,
+  obra_social: f.obra_social?.trim() || null,
+  observaciones: f.observaciones?.trim() || null,
 });
