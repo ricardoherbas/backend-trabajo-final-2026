@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
+
+import {Request, Response, NextFunction} from 'express';
 
 export const validarPersona = (
     req: Request,
@@ -10,46 +11,67 @@ export const validarPersona = (
         apellido,
         dni,
         fecha_nacimiento,
-        telefono,
+        telefono
     } = req.body;
 
-    if (!nombre || typeof nombre !== 'string') {
+    if (
+        typeof nombre !== 'string' ||
+        !nombre.trim()
+    ) {
         res.status(400).json({
-            mensaje: 'El nombre es obligatorio',
+            mensaje: 'El nombre es obligatorio'
         });
         return;
     }
 
-    if (!apellido || typeof apellido !== 'string') {
+    if (
+        typeof apellido !== 'string' ||
+        !apellido.trim()
+    ) {
         res.status(400).json({
-            mensaje: 'El apellido es obligatorio',
+            mensaje: 'El apellido es obligatorio'
         });
         return;
     }
 
-    if (!dni || typeof dni !== 'string') {
+    if (
+        typeof dni !== 'string' ||
+        !dni.trim()
+    ) {
         res.status(400).json({
-            mensaje: 'El DNI es obligatorio',
+            mensaje: 'El DNI es obligatorio'
         });
         return;
     }
 
-    if (fecha_nacimiento !== undefined && fecha_nacimiento !== null) {
-        if (Number.isNaN(Date.parse(fecha_nacimiento))) {
+    if (
+        fecha_nacimiento !== undefined &&
+        fecha_nacimiento !== null
+    ) {
+        if (
+            typeof fecha_nacimiento !== 'string' ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(fecha_nacimiento) ||
+            Number.isNaN(Date.parse(fecha_nacimiento)) ||
+            new Date(`${fecha_nacimiento}T00:00:00.000Z`)
+                .toISOString()
+                .slice(0, 10) !== fecha_nacimiento
+        ) {
             res.status(400).json({
-                mensaje: 'La fecha de nacimiento no es válida',
+                mensaje: 'La fecha de nacimiento no es válida'
             });
             return;
         }
     }
 
-    if (telefono !== undefined && telefono !== null) {
-        if (typeof telefono !== 'string') {
-            res.status(400).json({
-                mensaje: 'El teléfono no es válido',
-            });
-            return;
-        }
+    if (
+        telefono !== undefined &&
+        telefono !== null &&
+        typeof telefono !== 'string'
+    ) {
+        res.status(400).json({
+            mensaje: 'El teléfono no es válido'
+        });
+        return;
     }
 
     next();
