@@ -1,3 +1,4 @@
+
 import {Op} from 'sequelize';
 import {Paciente, Persona} from '../models';
 import {
@@ -168,7 +169,12 @@ export const actualizarPaciente = async (
         );
     }
 
-    await paciente.update(datos);
+    await paciente.update({
+        direccion: datos.direccion,
+        obra_social: datos.obra_social,
+        observaciones: datos.observaciones,
+        activo: datos.activo
+    });
 
     return paciente;
 };

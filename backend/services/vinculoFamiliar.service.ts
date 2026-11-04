@@ -1,3 +1,4 @@
+
 import {randomBytes} from 'crypto';
 import {VinculoFamiliar, Familiar, Paciente} from '../models';
 import {DatosCrearVinculo, DatosActualizarVinculo} from '../interfaces/vinculoFamiliar.interface';
@@ -117,8 +118,7 @@ export const obtenerVinculoFamiliar = async (
             },
             attributes: {
                 exclude: [
-                    'codigo_vinculacion',
-                    'codigo_usado'
+                    'codigo_vinculacion'
                 ]
             },
             include: [
@@ -148,8 +148,7 @@ export const listarVinculosFamiliares =
         return await VinculoFamiliar.findAll({
             attributes: {
                 exclude: [
-                    'codigo_vinculacion',
-                    'codigo_usado'
+                    'codigo_vinculacion'
                 ]
             },
             include: [
