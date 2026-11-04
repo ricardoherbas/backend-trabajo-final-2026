@@ -15,6 +15,8 @@ import type { Paciente } from '../interfaces/paciente.interface';
 
 export default function PacientesPage() {
   const { rol } = useAuth();
+  // El backend solo deja crear/editar a administrador y secretaria.
+  const puedeEditar = tieneRol(rol, ['administrador', 'secretaria']);
   const { data, isLoading, error } = usePacientes();
   const eliminar = useEliminarPaciente();
   const [busqueda, setBusqueda] = useState('');
@@ -43,7 +45,7 @@ export default function PacientesPage() {
       <PageHeader
         titulo="Pacientes"
         descripcion="Fichas de las personas que reciben cuidados."
-        accion={<Link className="btn btn-primario" to="/pacientes/nuevo">Nuevo paciente</Link>}
+        accion={puedeEditar ? <Link className="btn btn-primario" to="/pacientes/nuevo">Nuevo paciente</Link> : undefined}
       />
       <div className="panel">
         <div className="campo" style={{ maxWidth: 320, marginBottom: '1rem' }}>
@@ -63,7 +65,7 @@ export default function PacientesPage() {
             acciones={(p) => (
               <>
                 <Link className="btn btn-texto btn-chico" to={`/pacientes/${p.id}`}>Ver ficha</Link>
-                <Link className="btn btn-texto btn-chico" to={`/pacientes/${p.id}/editar`}>Editar</Link>
+                {puedeEditar && <Link className="btn btn-texto btn-chico" to={`/pacientes/${p.id}/editar`}>Editar</Link>}
                 {tieneRol(rol, ['administrador']) && (
                   <Button variante="texto" chico onClick={() => setAEliminar(p)}>Eliminar</Button>
                 )}
