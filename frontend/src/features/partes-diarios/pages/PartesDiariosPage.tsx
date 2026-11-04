@@ -11,10 +11,16 @@ import { Button } from '@/shared/components/ui/Button';
 import { formatFecha } from '@/shared/utils/formatFecha';
 import { useNombres } from '@/features/asignaciones/hooks/useNombres';
 import { useEliminarParteDiario, usePartesDiarios } from '../hooks/usePartesDiarios';
-import type { ParteDiario } from '../interfaces/parteDiario.interface';
+import type { ParteDiario, PersonaBasica } from '../interfaces/parteDiario.interface';
+
+/** "Apellido, Nombre" a partir de la persona anidada (el back solo manda nombre y apellido). */
+const nombrePersona = (persona?: PersonaBasica | null): string | null =>
+  persona ? `${persona.apellido}, ${persona.nombre}` : null;
 
 export default function PartesDiariosPage() {
   const { rol } = useAuth();
+  // El familiar solo consulta: el backend no le permite crear ni editar partes.
+  const puedeEscribir = tieneRol(rol, ['administrador', 'secretaria', 'cuidadora']);
   const { data, isLoading, error } = usePartesDiarios();
   const nombres = useNombres();
   const eliminar = useEliminarParteDiario();
@@ -38,7 +44,7 @@ export default function PartesDiariosPage() {
       <PageHeader
         titulo="Partes diarios"
         descripcion="Registro diario de cada paciente."
-        accion={<Link className="btn btn-primario" to="/partes-diarios/nuevo">Nuevo parte</Link>}
+        accion={puedeEscribir ? <Link className="btn btn-primario" to="/partes-diarios/nuevo">Nuevo parte</Link> : undefined}
       />
       <div className="panel">
         <StateView cargando={isLoading} error={error} vacio={ordenados.length === 0} textoVacio="Todavía no hay partes diarios.">
@@ -47,17 +53,31 @@ export default function PartesDiariosPage() {
             clave={(p) => p.id}
             columnas={[
               { titulo: 'Fecha', render: (p) => formatFecha(p.fecha) },
-              { titulo: 'Paciente', render: (p) => (p.asignacion ? nombres.paciente(p.asignacion.paciente_id) : `Asignación #${p.asignacion_id}`) },
-              { titulo: 'Cuidadora', render: (p) => (p.asignacion ? nombres.cuidadora(p.asignacion.cuidador_id) : '—') },
+              {
+                titulo: 'Paciente',
+                render: (p) =>
+                  nombrePersona(p.asignacion?.paciente?.persona) ??
+                  (p.asignacion ? nombres.paciente(p.asignacion.paciente_id) : `Asignación #${p.asignacion_id}`),
+              },
+              {
+                titulo: 'Cuidadora',
+                render: (p) =>
+                  nombrePersona(p.asignacion?.cuidadora?.persona) ??
+                  (p.asignacion ? nombres.cuidadora(p.asignacion.cuidador_id) : '—'),
+              },
               { titulo: 'Ánimo', render: (p) => p.animo ?? '—' },
               { titulo: 'Novedades', render: (p) => p.novedades ?? '—' },
             ]}
-            acciones={(p) => (
-              <>
-                <Link className="btn btn-texto btn-chico" to={`/partes-diarios/${p.id}/editar`}>Editar</Link>
-                {tieneRol(rol, ['administrador']) && <Button variante="texto" chico onClick={() => setAEliminar(p)}>Eliminar</Button>}
-              </>
-            )}
+            acciones={
+              puedeEscribir
+                ? (p) => (
+                    <>
+                      <Link className="btn btn-texto btn-chico" to={`/partes-diarios/${p.id}/editar`}>Editar</Link>
+                      {tieneRol(rol, ['administrador']) && <Button variante="texto" chico onClick={() => setAEliminar(p)}>Eliminar</Button>}
+                    </>
+                  )
+                : undefined
+            }
           />
         </StateView>
       </div>
