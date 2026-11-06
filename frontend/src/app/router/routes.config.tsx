@@ -10,7 +10,7 @@ export interface RutaApp {
   path: string;
   etiqueta: string;
   roles: Rol[];
-  /** true--> aparece en el menu lateral */
+  /** true -->aparece en el menu lateral */
   menu?: boolean;
   Componente: LazyExoticComponent<ComponentType>;
 }
@@ -19,12 +19,13 @@ const TODOS: Rol[] = ['administrador', 'secretaria', 'cuidadora', 'familiar'];
 const ADMIN: Rol[] = ['administrador'];
 const ADMIN_SEC: Rol[] = ['administrador', 'secretaria'];
 const ADMIN_SEC_CUID: Rol[] = ['administrador', 'secretaria', 'cuidadora'];
+const ADMIN_SEC_FAM: Rol[] = ['administrador', 'secretaria', 'familiar'];
 
 export const RUTAS_PUBLICAS = [
   { path: '/login', Componente: lazy(() => import('@/features/auth/pages/LoginPage')) },
   { path: '/registro', Componente: lazy(() => import('@/features/auth/pages/RegistroFamiliarPage')) },
   { path: '/recuperar-password', Componente: lazy(() => import('@/features/auth/pages/RecuperarPasswordPage')) },
-  // El backend arma este link en el email de recuperacion: /restablecer-password?token=...
+  // El backend arma este link en el email de recuperación: /restablecer-password?token=...
   { path: '/restablecer-password', Componente: lazy(() => import('@/features/auth/pages/RestablecerPasswordPage')) },
 ];
 
@@ -43,7 +44,7 @@ export const RUTAS_PRIVADAS: RutaApp[] = [
   { path: '/asignaciones', etiqueta: 'Asignaciones', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/asignaciones/pages/AsignacionesPage')) },
   { path: '/medicamentos', etiqueta: 'Medicamentos', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/medicamentos/pages/MedicamentosPage')) },
 
-  { path: '/tratamientos', etiqueta: 'Tratamientos', roles: ADMIN_SEC_CUID, menu: true, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientosPage')) },
+  { path: '/tratamientos', etiqueta: 'Tratamientos', roles: TODOS, menu: true, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientosPage')) },
   { path: '/tratamientos/nuevo', etiqueta: 'Nuevo tratamiento', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientoFormPage')) },
   { path: '/tratamientos/:id/editar', etiqueta: 'Editar tratamiento', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/tratamientos/pages/TratamientoFormPage')) },
 
@@ -51,7 +52,7 @@ export const RUTAS_PRIVADAS: RutaApp[] = [
   { path: '/partes-diarios/nuevo', etiqueta: 'Nuevo parte diario', roles: ADMIN_SEC_CUID, Componente: lazy(() => import('@/features/partes-diarios/pages/ParteDiarioFormPage')) },
   { path: '/partes-diarios/:id/editar', etiqueta: 'Editar parte diario', roles: ADMIN_SEC_CUID, Componente: lazy(() => import('@/features/partes-diarios/pages/ParteDiarioFormPage')) },
 
-  { path: '/pagos', etiqueta: 'Pagos', roles: ADMIN_SEC, menu: true, Componente: lazy(() => import('@/features/pagos/pages/PagosPage')) },
+  { path: '/pagos', etiqueta: 'Pagos', roles: ADMIN_SEC_FAM, menu: true, Componente: lazy(() => import('@/features/pagos/pages/PagosPage')) },
   { path: '/pagos/nuevo', etiqueta: 'Nuevo pago', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/pagos/pages/PagoFormPage')) },
   { path: '/pagos/:id/editar', etiqueta: 'Editar pago', roles: ADMIN_SEC, Componente: lazy(() => import('@/features/pagos/pages/PagoFormPage')) },
 
@@ -61,5 +62,5 @@ export const RUTAS_PRIVADAS: RutaApp[] = [
 export const rutasDelMenu = (rol: Rol | null): RutaApp[] =>
   RUTAS_PRIVADAS.filter((r) => r.menu && rol && r.roles.includes(rol));
 
-/** Primera pantalla del menu a la que puede entrar el rol. */
+/** primera pantalla del menú a la que puede entrar el rol. */
 export const rutaInicial = (rol: Rol | null): string => rutasDelMenu(rol)[0]?.path ?? '/login';
